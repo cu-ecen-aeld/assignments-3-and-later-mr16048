@@ -16,7 +16,7 @@ fi
 fileNum=0
 lineNum=0
 
-for file in $filesdir; do
+for file in "$filesdir"/*; do
     echo $file
     lineNumTemp=$(grep -c $searchstr $file)
     if [ $lineNumTemp > 0 ]; then
