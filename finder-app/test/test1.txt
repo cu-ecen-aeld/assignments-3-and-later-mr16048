@@ -1,3 +1,0 @@
-teststr
-aa
-bb
