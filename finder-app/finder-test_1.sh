@@ -9,7 +9,6 @@ NUMFILES=10
 WRITESTR=AELD_IS_FUN
 WRITEDIR=/tmp/aeld-data
 username=$(cat conf/username.txt)
-EXE_FILE="./writer"
 
 if [ $# -lt 3 ]
 then
@@ -31,8 +30,6 @@ MATCHSTR="The number of files are ${NUMFILES} and the number of matching lines a
 echo "Writing ${NUMFILES} files containing string ${WRITESTR} to ${WRITEDIR}"
 
 rm -rf "${WRITEDIR}"
-make clean
-make
 
 # create $WRITEDIR if not assignment1
 assignment=`cat ../conf/assignment.txt`
@@ -57,8 +54,7 @@ fi
 
 for i in $( seq 1 $NUMFILES)
 do
-	# ./writer.sh "$WRITEDIR/${username}$i.txt" "$WRITESTR"
-	$EXE_FILE "$WRITEDIR/${username}$i.txt" "$WRITESTR"
+	./writer.sh "$WRITEDIR/${username}$i.txt" "$WRITESTR"
 done
 
 OUTPUTSTRING=$(./finder.sh "$WRITEDIR" "$WRITESTR")
