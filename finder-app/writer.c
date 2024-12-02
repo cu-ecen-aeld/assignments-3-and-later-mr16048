@@ -19,6 +19,7 @@ int main(int argc, char *argv[]) {
   ssize_t writen;
 
   openlog("writer", LOG_PID|LOG_CONS, LOG_USER);
+
   if (argc != 3){
     perror("Insufficient arguments");
     syslog(LOG_ERR, "Insufficient arguments");
