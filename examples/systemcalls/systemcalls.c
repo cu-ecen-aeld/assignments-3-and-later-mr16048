@@ -1,7 +1,10 @@
 #include "systemcalls.h"
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -45,7 +48,8 @@ bool do_exec(int count, ...)
     va_list args;
     va_start(args, count);
     char * command[count+1];
-    int i, pid;
+    int i;
+    pid_t pid;
     for(i=0; i<count; i++)
     {
         command[i] = va_arg(args, char *);
@@ -64,17 +68,20 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-
     pid = fork();
     switch(pid)
     {
         case -1:
             return false;
         case 0:
-            execv(command[0], command);
-            return false;
+            if (execv(command[0], command) == -1){            
+                _exit(-1);
+            }
+
         default:
-            wait(NULL);
+            if(waitpid(pid, NULL, 0) == -1){
+                return false;
+            }
     }
 
     va_end(args);
@@ -93,7 +100,8 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
     va_start(args, count);
     char * command[count+1];
     int i;
-    int fd, pid;
+    int fd;
+    pid_t pid;
 
     for(i=0; i<count; i++)
     {
@@ -129,10 +137,13 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
                 return false;
             }
             close(fd);
-            execv(command[0], command);
-            return false;
+            if(execv(command[0], command) == -1){
+                return false;
+            }
         default:
-            wait(NULL);
+            if(waitpid(pid, NULL, 0) == -1){
+                return false;
+            }
     }
     va_end(args);
 
