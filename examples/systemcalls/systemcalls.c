@@ -48,7 +48,7 @@ bool do_exec(int count, ...)
     va_list args;
     va_start(args, count);
     char * command[count+1];
-    int i;
+    int i, status;
     pid_t pid;
     for(i=0; i<count; i++)
     {
@@ -79,7 +79,12 @@ bool do_exec(int count, ...)
             }
 
         default:
-            if(waitpid(pid, NULL, 0) == -1){
+            if(waitpid(pid, &status, 0) == -1){
+                return false;
+            }
+            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+                return true;
+            } else {
                 return false;
             }
     }
