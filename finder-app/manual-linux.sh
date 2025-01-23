@@ -12,9 +12,7 @@ BUSYBOX_VERSION=1_33_1
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
 CROSS_COMPILE=~/sysp/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-
-ROOTDIR=${OUTDIR}/rootfs
-HOMEDIR=${ROOTDIR}/home
-GIT_PATCH_PATH=${OUTDIR}/git_patch.patch
+
 ARM_DIR=~/sysp/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc
 ARM_LIB_DIR=${ARM_DIR}/lib64/
 ARM_INTERPRETER=${ARM_DIR}/lib
@@ -38,13 +36,14 @@ fi
 if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
     cd linux-stable
     echo "Checking out version ${KERNEL_VERSION}"
-    git checkout ${KERNEL_VERSION}
+    git checkout "${KERNEL_VERSION}" || { echo "Failed to checkout version ${KERNEL_VERSION}"; exit 1; }
     # if [ ! -e ${GIT_PATCH_PATH} ]; then
-        echo "Downloading the patch"
-        curl -o ${GIT_PATCH_PATH} https://github.com/torvalds/linux/commit/e33a814e772cdc36436c8c188d8c42d019fda639.patch    
+        # echo "Downloading the patch"
+        # GIT_PATCH_PATH="${OUTDIR}/git_patch.patch"
+        # curl -o "${GIT_PATCH_PATH}" https://github.com/torvalds/linux/commit/e33a814e772cdc36436c8c188d8c42d019fda639.patch    
 
-        echo "Applying the patch"
-        git apply "${GIT_PATCH_PATH}"
+        # echo "Applying the patch"
+        # git apply "${GIT_PATCH_PATH}" || { echo "Failed to apply patch"; exit 1; }
     # fi
 
     echo "Building the kernel"
@@ -64,6 +63,10 @@ echo "Adding the Image in outdir"
 
 echo "Creating the staging directory for the root filesystem"
 cd "$OUTDIR"
+
+ROOTDIR=${OUTDIR}/rootfs
+HOMEDIR=${ROOTDIR}/home
+
 if [ -d "${ROOTDIR}" ]
 then
 	echo "Deleting rootfs directory at ${ROOTDIR} and starting over"
