@@ -11,9 +11,12 @@ KERNEL_VERSION=v5.15.163
 BUSYBOX_VERSION=1_33_1
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
-CROSS_COMPILE="$FINDER_APP_DIR/../arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-"
+COMPILER_DIR="$FINDER_APP_DIR/.."
+COMPILER_NAME="arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
+COMPILER_DOWNLOAD="https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
+CROSS_COMPILE="$COMPILER_DIR/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-"
 
-ARM_DIR="$FINDER_APP_DIR/../arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc"
+ARM_DIR="$COMPILER_DIR/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc"
 ARM_LIB_DIR=${ARM_DIR}/lib64/
 ARM_INTERPRETER=${ARM_DIR}/lib
 
@@ -46,6 +49,16 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
         # git apply "${GIT_PATCH_PATH}" || { echo "Failed to apply patch"; exit 1; }
     # fi
 
+    if [ ! -d "$ARM_DIR" ]; then
+    
+        echo "Download cross compiler"
+        cd $COMPILER_DIR
+        curl -L $COMPILER_DOWNLOAD -o $COMPILER_NAME
+        tar xJf $COMPILER_NAME -C $COMPILER_DIR
+
+        rm -rf $COMPILER_NAME
+    fi
+    
     echo "Building the kernel"
 
     # TODO: Add your kernel build steps here

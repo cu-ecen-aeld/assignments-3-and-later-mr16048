@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -82,9 +83,10 @@ bool do_exec(int count, ...)
             if(waitpid(pid, &status, 0) == -1){
                 return false;
             }
-            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {                
                 return true;
-            } else {
+            } else {                
+                printf("error code: %d\n", WIFEXITED(status));
                 return false;
             }
     }
