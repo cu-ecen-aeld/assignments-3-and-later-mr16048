@@ -58,7 +58,7 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
 
         rm -rf $COMPILER_NAME
     fi
-    
+    ls -l ${COMPILER_DOWNLOAD}
     echo "Building the kernel"
 
     # TODO: Add your kernel build steps here
