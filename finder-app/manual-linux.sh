@@ -11,10 +11,10 @@ KERNEL_VERSION=v5.15.163
 BUSYBOX_VERSION=1_33_1
 FINDER_APP_DIR=$(realpath $(dirname $0))
 ARCH=arm64
-COMPILER_DIR="$FINDER_APP_DIR/.."
+COMPILER_DIR="${FINDER_APP_DIR}/.."
 COMPILER_NAME="arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
 COMPILER_DOWNLOAD="https://developer.arm.com/-/media/Files/downloads/gnu/13.3.rel1/binrel/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu.tar.xz"
-CROSS_COMPILE="$COMPILER_DIR/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-"
+CROSS_COMPILE="${COMPILER_DIR}/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-"
 
 ARM_DIR="$COMPILER_DIR/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc"
 ARM_LIB_DIR=${ARM_DIR}/lib64/
@@ -58,7 +58,9 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
 
         rm -rf $COMPILER_NAME
     fi
-    ls -l ${COMPILER_DIR}
+    pwd
+    ls -l ${COMPILER_DIR}/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/
+    ls -l ${COMPILER_DIR}/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/
     echo "Building the kernel"
 
     # TODO: Add your kernel build steps here
