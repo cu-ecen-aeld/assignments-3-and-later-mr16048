@@ -58,11 +58,9 @@ if [ ! -e ${OUTDIR}/linux-stable/arch/${ARCH}/boot/Image ]; then
 
         rm -rf $COMPILER_NAME
     fi
-    pwd
-    ls -l ${COMPILER_DIR}/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/
-    ls -l ${COMPILER_DIR}/arm-gnu-toolchain-13.3.rel1-x86_64-aarch64-none-linux-gnu/bin/
+    
     echo "Building the kernel"
-
+    cd ${OUTDIR}/linux-stable
     # TODO: Add your kernel build steps here
     
     make ARCH=${ARCH} CROSS_COMPILE=${CROSS_COMPILE} mrproper
