@@ -7,13 +7,27 @@
 #define DEBUG_LOG(msg,...)
 //#define DEBUG_LOG(msg,...) printf("threading: " msg "\n" , ##__VA_ARGS__)
 #define ERROR_LOG(msg,...) printf("threading ERROR: " msg "\n" , ##__VA_ARGS__)
+typedef struct thread_data thread_data;
 
 void* threadfunc(void* thread_param)
 {
 
     // TODO: wait, obtain mutex, wait, release mutex as described by thread_data structure
     // hint: use a cast like the one below to obtain thread arguments from your parameter
-    //struct thread_data* thread_func_args = (struct thread_data *) thread_param;
+    thread_data* thread_func_args = (thread_data *) thread_param;
+
+    pthread_mutex_t *mutex = thread_func_args->mutex;
+
+    usleep(thread_func_args->wait_to_obtain_ms * 1000);
+
+    pthread_mutex_lock(mutex);
+
+    usleep(thread_func_args->wait_to_release_ms * 1000);
+
+    thread_func_args->thread_complete_success = true;
+    pthread_cond_signal(thread_func_args->cond);
+    pthread_mutex_unlock(mutex);
+
     return thread_param;
 }
 
@@ -28,6 +42,36 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
      *
      * See implementation details in threading.h file comment block
      */
-    return false;
+    void *ret_val;
+    pthread_cond_t cond = PTHREAD_COND_INITIALIZER;
+
+     thread_data *data = (thread_data *)malloc(sizeof(thread_data));
+     if(data == NULL){
+        return false;
+     }
+     data->wait_to_obtain_ms = wait_to_obtain_ms;
+     data->wait_to_release_ms = wait_to_release_ms;
+     data->mutex = mutex;
+     data->cond = &cond;
+     data->thread_complete_success = false;
+
+     if(pthread_create(thread, &data, threadfunc, NULL) != 0){
+        return false;
+     }
+
+     pthread_mutex_lock(mutex);
+     while(!data->thread_complete_success){
+        pthread_cond_wait(&cond, mutex);
+     }
+     pthread_mutex_unlock(mutex);
+
+     if(pthread_join(thread, &ret_val) != 0){
+        return false;
+     }
+
+     pthread_mutex_lock(mutex);
+
+     free(data);
+    return true;
 }
 
