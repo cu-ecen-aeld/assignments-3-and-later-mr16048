@@ -11,7 +11,7 @@ typedef struct thread_data thread_data;
 
 void* threadfunc(void* thread_param)
 {
-
+   printf("start child\n");
     // TODO: wait, obtain mutex, wait, release mutex as described by thread_data structure
     // hint: use a cast like the one below to obtain thread arguments from your parameter
     thread_data* thread_func_args = (thread_data *) thread_param;
@@ -19,14 +19,17 @@ void* threadfunc(void* thread_param)
     pthread_mutex_t *mutex = thread_func_args->mutex;
 
     usleep(thread_func_args->wait_to_obtain_ms * 1000);
-
+    printf("child start to try locking mutex\n");
     pthread_mutex_lock(mutex);
+    printf("child locked mutex\n");
 
     usleep(thread_func_args->wait_to_release_ms * 1000);
 
     thread_func_args->thread_complete_success = true;
     pthread_cond_signal(thread_func_args->cond);
+    printf("child send cond sig\n");
     pthread_mutex_unlock(mutex);
+    printf("child released mutex\n");
 
     return thread_param;
 }
@@ -55,21 +58,24 @@ bool start_thread_obtaining_mutex(pthread_t *thread, pthread_mutex_t *mutex,int 
      data->cond = &cond;
      data->thread_complete_success = false;
 
-     if(pthread_create(thread, &data, threadfunc, NULL) != 0){
+     if(pthread_create(thread, NULL, threadfunc, &data) != 0){
         return false;
      }
 
-     pthread_mutex_lock(mutex);
+     printf("parent start waiting\n");
      while(!data->thread_complete_success){
-        pthread_cond_wait(&cond, mutex);
+      printf("parent waiting...\n");  
+      if(pthread_cond_wait(&cond, mutex) != 0){
+         printf("cond_wait_failed\n");
+         exit(-1);
+      }
      }
      pthread_mutex_unlock(mutex);
+     printf("parent released mutex\n");
 
-     if(pthread_join(thread, &ret_val) != 0){
+     if(pthread_join(*thread, &ret_val) != 0){
         return false;
      }
-
-     pthread_mutex_lock(mutex);
 
      free(data);
     return true;
