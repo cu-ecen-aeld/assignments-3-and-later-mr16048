@@ -15,7 +15,6 @@ struct thread_data{
      * your thread implementation.
      */
     pthread_mutex_t *mutex;
-    pthread_cond_t *cond;
     int wait_to_obtain_ms;
     int wait_to_release_ms;
     /**
