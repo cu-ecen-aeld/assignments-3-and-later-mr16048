@@ -63,6 +63,7 @@ do
 done
 
 OUTPUTSTRING=$($FINDER_EXE "$WRITEDIR" "$WRITESTR")
+${OUTPUTSTRING} > ${RESULT_FILE}
 
 # remove temporary directories
 rm -rf /tmp/aeld-data
@@ -77,5 +78,3 @@ else
 	echo "failed: expected  ${MATCHSTR} in ${OUTPUTSTRING} but instead found"
 	exit 1
 fi
-
-${OUTPUTSTRING} > ${RESULT_FILE}
