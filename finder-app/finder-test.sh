@@ -14,8 +14,6 @@ WRITR_EXE="writer"
 FINDER_EXE="finder.sh"
 RESULT_FILE="/tmp/assignment4-result.txt"
 
-echo "hello" > ${RESULT_FILE}
-
 if [ $# -lt 3 ]
 then
 	echo "Using default value ${WRITESTR} for string to write"
