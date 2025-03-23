@@ -6,10 +6,16 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <syslog.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+
+#define BUF_SIZE 1024
 
 int main(){
-  int sock, new_fd;
+  int sock, new_fd, read_byte, write_byte, out_fd;
+  int err = 0;
   struct addrinfo hints, *res;
+  char buffer[BUF_SIZE];
 
   openlog("aesdsocket", LOG_PID | LOG_CONS, LOG_USER);
 
@@ -53,8 +59,34 @@ int main(){
                 host, sizeof(host), NULL, 0, NI_NUMERICHOST);
   syslog(LOG_INFO, "Accepted connection from %s\n", host);
 
+  out_fd = open("/var/tmp/aesdsocketdata", O_RDWR | O_CREAT | O_TRUNC, 0644);
+  if(out_fd == -1){
+    err = 1;
+    goto CLOSE;
+  }
 
+  while(1){
+
+      // read from client
+      read_byte = read(new_fd, buffer, BUF_SIZE);
+      if(read_byte < 0){
+        err = 1;
+        break;
+      }
+
+      // write to file
+      write_byte = write(out_fd, buffer, read_byte);
+      if(write_byte != read_byte){
+        err = 1;
+        break;
+      }
+  }
+
+CLOSE:
   close(new_fd);
   close(sock);
   closelog();
+  if(err > 0){
+    return -1;
+  }
 }
