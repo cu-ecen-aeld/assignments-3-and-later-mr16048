@@ -8,7 +8,7 @@ TARGET = aesdsocket
 all: $(TARGET)
 
 aesdsocket: aesdsocket.c
-	 $(CROSS_COMPILE)$(CC) $(CROSS_COMPILE_FLAGS) $(CFLAGS) -o $@ $<
+	 $(CC) $(CROSS_COMPILE_FLAGS) $(CFLAGS) -o $@ $<
 
 clean:
 	rm -f $(TARGET)
