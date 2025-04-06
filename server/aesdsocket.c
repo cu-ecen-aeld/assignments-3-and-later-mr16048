@@ -34,6 +34,7 @@ int main(){
   socklen_t addr_size;
   char host[NI_MAXHOST];
 
+  printf("start aesdsocket main\n");
   openlog("aesdsocket", LOG_PID | LOG_CONS, LOG_USER);
 
   //set signal handler
