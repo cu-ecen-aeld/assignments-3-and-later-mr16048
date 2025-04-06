@@ -1,5 +1,5 @@
 # CC = aarch64-none-linux-gnu-gcc
-CC =gcc
+CC ?=gcc
 # CROSS_COMPILE_FLAGS = -print-sysroot -v
 CROSS_COMPILE_FLAGS = 
 CFLAGS = -Wall -g
