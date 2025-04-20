@@ -34,7 +34,7 @@ int main(){
   socklen_t addr_size;
   char host[NI_MAXHOST];
 
-  printf("start aesdsocket main\n");
+  echo("start aesdsocket main\n");
   openlog("aesdsocket", LOG_PID | LOG_CONS, LOG_USER);
 
   //set signal handler
@@ -48,6 +48,7 @@ int main(){
 
   sock = socket(PF_INET, SOCK_STREAM, 0);
   if(sock == -1){
+    perror("socket");
     return -1;
   }
 
@@ -58,18 +59,21 @@ int main(){
 
   if(getaddrinfo(NULL, "9000", &hints, &res) != 0){
     close(sock);
+    perror("getaddrinfo");
     return -1;
   }
 
   if(bind(sock, res->ai_addr, res->ai_addrlen) == -1){
     close(sock);
     freeaddrinfo(res);
+    perror("bind");
     return -1;
   }
   freeaddrinfo(res);
 
   if(listen(sock, 3) == -1){
     close(sock);
+    perror("listen");
     return -1;
   }
 
@@ -87,6 +91,7 @@ int main(){
                   host, sizeof(host), NULL, 0, NI_NUMERICHOST);
     syslog(LOG_INFO, "Accepted connection from %s\n", host);
     printf("Accepted connection from %s\n", host);
+    echo("accepted");
 
     out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
     if(out_fd == -1){
@@ -125,6 +130,7 @@ int main(){
         break;
       }
       printf("Read %d bytes from file\n", read_from_file);
+      echo("read");
       //send to client
       err = write_all(new_fd, file_buffer, read_from_file);
       if(err != 0){
@@ -132,6 +138,7 @@ int main(){
         break;
       }
     }
+    echo("write");
     syslog(LOG_INFO, "Closed connection from XXX %s\n", host);
     close(out_fd);
     close(new_fd);
