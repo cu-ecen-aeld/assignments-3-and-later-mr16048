@@ -1,8 +1,8 @@
 # CC = aarch64-none-linux-gnu-gcc
-CC ?=gcc
+CC ?=$(TARGET_CC)
 # CROSS_COMPILE_FLAGS = -print-sysroot -v
 CROSS_COMPILE_FLAGS = 
-CFLAGS = -Wall -g
+CFLAGS += -Wall -g
 TARGET = aesdsocket
 
 all: $(TARGET)
