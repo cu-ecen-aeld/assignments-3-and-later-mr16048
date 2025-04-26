@@ -10,23 +10,25 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <time.h>
-
+#include <pthread.h>
 #define BUF_SIZE 1024
 #define OUT_FILE "/var/tmp/aesdsocketdata"
 
 static int write_all(int, void *, size_t);
 void sig_handler(int);
 // static void print_cur_time(void);
-static int proc_new_connection(int);
+static int proc_new_connection(void *);
+static int create_thread_and_run(int);
 
 volatile sig_atomic_t quit_sig = 0;
+pthread_mutex_t mutex;
 
 void sig_handler(int sig){
   quit_sig = 1;
 }
 
 int main(){
-  int sock, new_fd, read_byte, out_fd, read_from_file;
+  int sock, new_fd;
   int err = 0;
   struct addrinfo hints, *res;
 
@@ -36,6 +38,8 @@ int main(){
 
   printf("start aesdsocket main\n");
   openlog("aesdsocket", LOG_PID | LOG_CONS, LOG_USER);
+
+  pthread_mutex_init(&mutex, NULL);
 
   //set signal handler
   struct sigaction sa;
@@ -87,7 +91,8 @@ int main(){
                   host, sizeof(host), NULL, 0, NI_NUMERICHOST);
     syslog(LOG_INFO, "Accepted connection from %s\n", host);
     printf("Accepted connection from %s\n", host);
-    
+
+    create_thread_and_run(new_fd); 
   }
 
 CLOSE:
@@ -97,7 +102,6 @@ CLOSE:
   }
   if(err != 0){
     close(new_fd);
-    close(out_fd);
   }
   close(sock);
   closelog();
@@ -131,7 +135,7 @@ static int write_all(int fd, void *buffer, size_t write_size){
 //   printf("%ds %dns\n", t1.tv_sec, t1.tv_nsec);
 // }
 
-static int proc_new_connection(int new_fd){
+static int proc_new_connection(void *arg){
   int read_byte, out_fd, read_from_file, tmp_fd;
   char buffer[BUF_SIZE];
   char file_buffer[BUF_SIZE];
@@ -139,14 +143,12 @@ static int proc_new_connection(int new_fd){
   #define TMP_FILE_NAME_SIZE 21
   char tmp_file_name[TMP_FILE_NAME_SIZE] = "/var/tmp/aesdsocket01";
   
-  out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
-  if(out_fd == -1){
-    return -1;
-  }
+  int new_fd = *(int*)(arg);
+  free(arg);
 
-  snprintf(tmp_file_name, TMP_FILE_NAME_SIZE);
-  tmp_fd = open("/var/tmp/aesdsocketdata", O_RDWR | O_CREAT | O_APPEND, 0644);
-  if(out_fd == -1){
+  snprintf(tmp_file_name, TMP_FILE_NAME_SIZE, "/var/tmp/aesdsocket%02d", new_fd);
+  tmp_fd = open(tmp_file_name, O_RDWR | O_CREAT | O_APPEND, 0644);
+  if(tmp_fd == -1){
     return -1;
   }
 
@@ -155,13 +157,12 @@ static int proc_new_connection(int new_fd){
     read_byte = read(new_fd, buffer, BUF_SIZE);  
     if(read_byte <= 0){
       if(read_byte < 0){
-        return -1;
+        err = -1;
       }
       break;
     }
-    // write to file
+    // write to tmp file
     err = write_all(tmp_fd, buffer, read_byte);
-    close(out_fd);
     if(err != 0){
       break;
     }
@@ -169,6 +170,23 @@ static int proc_new_connection(int new_fd){
     if(memchr(buffer, '\n', read_byte)){
       break;
     }
+  }
+  close(tmp_fd);
+  if(err != 0){
+    return -1;
+  }
+
+  // write to file
+  pthread_mutex_lock(&mutex);
+  out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
+  if(out_fd == -1){
+    return -1;
+  }
+  err = write_all(out_fd, buffer, read_byte);
+  close(out_fd);
+  pthread_mutex_unlock(&mutex);
+  if(err != 0){
+    return -1;
   }
 
   out_fd = open(OUT_FILE, O_RDONLY, 0644);
@@ -181,7 +199,7 @@ static int proc_new_connection(int new_fd){
       }
       break;
     }
-    printf("Read %d bytes from file\n", read_from_file);
+    // printf("Read %d bytes from file\n", read_from_file);
     //send to client
     err = write_all(new_fd, file_buffer, read_from_file);
     if(err != 0){
@@ -189,9 +207,37 @@ static int proc_new_connection(int new_fd){
       break;
     }
   }
-  syslog(LOG_INFO, "Closed connection from XXX %s\n", host);
+  // syslog(LOG_INFO, "Closed connection from XXX %s\n", host);
   close(out_fd);
   close(new_fd); 
 
+  return err;
+}
+
+static int create_thread_and_run(int new_fd){
+
+  pthread_t thread;
+  int err = 0;
+
+  int *client_fd = malloc(sizeof(int));
+  if(!client_fd){
+    perror("alloc for client_fd\n");
+    err = 1;
+    goto TH_END;
+  }
+  *client_fd = new_fd;
+
+  if (pthread_create(&thread, NULL, proc_new_connection, client_fd)!= 0) {
+      perror("Failed to create thread");
+      err = 1;
+      goto TH_END;
+    }
+
+  if (pthread_detach(thread) != 0) {
+    perror("Failed to join thread");
+    err = 1;
+    goto TH_END;
+  }
+TH_END:
   return err;
 }
