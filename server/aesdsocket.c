@@ -34,7 +34,7 @@ int main(){
   socklen_t addr_size;
   char host[NI_MAXHOST];
 
-  echo("start aesdsocket main\n");
+  printf("start aesdsocket main\n");
   openlog("aesdsocket", LOG_PID | LOG_CONS, LOG_USER);
 
   //set signal handler
@@ -91,7 +91,7 @@ int main(){
                   host, sizeof(host), NULL, 0, NI_NUMERICHOST);
     syslog(LOG_INFO, "Accepted connection from %s\n", host);
     printf("Accepted connection from %s\n", host);
-    echo("accepted");
+    printf("accepted");
 
     out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
     if(out_fd == -1){
@@ -130,7 +130,6 @@ int main(){
         break;
       }
       printf("Read %d bytes from file\n", read_from_file);
-      echo("read");
       //send to client
       err = write_all(new_fd, file_buffer, read_from_file);
       if(err != 0){
@@ -138,7 +137,6 @@ int main(){
         break;
       }
     }
-    echo("write");
     syslog(LOG_INFO, "Closed connection from XXX %s\n", host);
     close(out_fd);
     close(new_fd);
