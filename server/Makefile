@@ -3,11 +3,11 @@ CC ?=gcc
 # CROSS_COMPILE_FLAGS = -print-sysroot -v
 CROSS_COMPILE_FLAGS = 
 CFLAGS = -Wall -g
-TARGET = aesdsocket
+TARGET = aesdsocket_main
 
 all: $(TARGET)
 
-aesdsocket: aesdsocket.c
+aesdsocket_main: aesdsocket_main.c
 	 $(CC) $(CROSS_COMPILE_FLAGS) $(CFLAGS) -o $@ $<
 
 clean:
