@@ -1,7 +1,7 @@
 #!/bin/sh
 
 DAEMON_NAME="aesdsocket_main"
-DAEMON_DIR="./"
+DAEMON_DIR=$(dirname "$(realpath "$0")")
 DAEMON_PATH="$DAEMON_DIR/$DAEMON_NAME"
 PIDFILE="/var/run/$DAEMON_NAME.pid"
 
