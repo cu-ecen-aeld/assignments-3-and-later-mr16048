@@ -70,11 +70,13 @@ int main(){
   hints.ai_flags = AI_PASSIVE;      // For binding with NULL node (listen on all interfaces)
 
   if(getaddrinfo(NULL, "9000", &hints, &res) != 0){
+    perror("getaddrinfo");
     goto CLOSE;
   }
   
   int yes = 1;
   if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes)) == -1) {
+    perror("setsockopt");
     goto CLOSE;
   }
   if(bind(sock, res->ai_addr, res->ai_addrlen) == -1){
