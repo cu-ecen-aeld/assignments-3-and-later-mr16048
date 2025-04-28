@@ -5,6 +5,7 @@ DAEMON_DIR=$(dirname "$(realpath "$0")")
 DAEMON_PATH="$DAEMON_DIR/$DAEMON_NAME"
 PIDFILE="/var/run/$DAEMON_NAME.pid"
 echo "aesdscoket launcher start"
+echo $DAEMON_PATH
 if [ "$1" = "-d" ]; then
     # Run as daemon using start-stop-daemon
     start-stop-daemon -S --background -d $DAEMON_DIR --exec $DAEMON_PATH
