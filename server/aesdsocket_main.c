@@ -70,7 +70,7 @@ int main(){
   hints.ai_flags = AI_PASSIVE;      // For binding with NULL node (listen on all interfaces)
 
   if(getaddrinfo(NULL, "9000", &hints, &res) != 0){
-    perror("getaddrinfo");
+    perror("getaddrinfo ");
     goto CLOSE;
   }
   
