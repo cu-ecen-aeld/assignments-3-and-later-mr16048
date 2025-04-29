@@ -9,6 +9,8 @@ echo "aesdscoket launcher start"
 echo "target program:"
 echo $DAEMON_PATH
 ls -l $DAEMON_PATH
+echo "run as:"
+whoami
 
 if which start-stop-daemon > /dev/null 2>&1; then
     echo "start-stop-daemon found"
