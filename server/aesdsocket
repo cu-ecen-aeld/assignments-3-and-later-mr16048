@@ -27,3 +27,6 @@ else
     echo "start normally"
     $DAEMON_PATH
 fi
+
+echo "=== Running processes ==="
+ps aux | grep 'aesd'
