@@ -33,3 +33,5 @@ fi
 
 echo "=== Running processes ==="
 ps aux | grep 'aesd'
+
+sleep 2
