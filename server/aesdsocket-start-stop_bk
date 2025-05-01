@@ -1,0 +1,37 @@
+#!/bin/sh
+
+DAEMON_NAME="aesdsocket_main"
+DAEMON_DIR=$(dirname "$(realpath "$0")")
+DAEMON_PATH="$DAEMON_DIR/$DAEMON_NAME"
+PIDFILE="/var/run/$DAEMON_NAME.pid"
+echo "aesdscoket launcher start"
+
+echo "target program:"
+echo $DAEMON_PATH
+ls -l $DAEMON_PATH
+echo "run as:"
+whoami
+
+if which start-stop-daemon > /dev/null 2>&1; then
+    echo "start-stop-daemon found"
+else
+    echo "start-stop-daemon NOT found"
+    exit 1
+fi
+
+if [ "$1" = "-d" ]; then
+    # Run as daemon using start-stop-daemon
+    echo "start as daemon"
+    start-stop-daemon -S --background -d $DAEMON_DIR --exec $DAEMON_PATH
+    ret=$?
+    echo "start-stop-daemon exited with code $ret"
+else
+    # Run normally
+    echo "start normally"
+    $DAEMON_PATH
+fi
+
+echo "=== Running processes ==="
+ps aux | grep 'aesd'
+
+sleep 2
