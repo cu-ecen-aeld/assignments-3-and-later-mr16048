@@ -15,7 +15,7 @@ PIDFILE="/var/run/$DAEMON_NAME.pid"
 case "$1" in
   start)
     echo "starting aesdsocket"
-    start-stop-daemon -S --make-pidfile --pidfile  $PIDFILE --background -d $DAEMON_DIR --exec $DAEMON_PATH
+    start-stop-daemon -S --make-pidfile --pidfile  $PIDFILE --background --exec $DAEMON_PATH
     ;;
 
   stop)
