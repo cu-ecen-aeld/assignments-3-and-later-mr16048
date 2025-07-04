@@ -16,6 +16,7 @@
 #include <linux/printk.h>
 #include <linux/types.h>
 #include <linux/cdev.h>
+#include <linux/slab.h>
 #include <linux/fs.h> // file_operations
 #include "aesdchar.h"
 int aesd_major =   0; // use dynamic major
@@ -25,6 +26,8 @@ MODULE_AUTHOR("Your Name Here"); /** TODO: fill in your name **/
 MODULE_LICENSE("Dual BSD/GPL");
 
 struct aesd_dev aesd_device;
+
+struct aesd_circular_buffer *buffer;
 
 int aesd_open(struct inode *inode, struct file *filp)
 {
@@ -63,6 +66,29 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     /**
      * TODO: handle write
      */
+    /* free if already allocated */
+     if(buffer->full){
+        kfree((buffer->entry[buffer->in_offs])->buffptr);
+        kfree(buffer->entry[buffer->in_offs]);
+     }
+     /* set up new entry */
+     char *kbuf = kmalloc(count, GFP_KERNEL);
+     if(kbuf == NULL){
+        return -ENOMEM;
+     }
+     struct aesd_buffer_entry *entry = kmalloc(sizeof(struct aesd_buffer_entry), GFP_KERNEL);
+    if(entry == NULL){
+        return -ENOMEM;
+     }
+     entry->buffptr = kbuf;
+
+     /* copy to the new entry */
+     copy_from_user(kbuf, buffer, count);
+     entry->size = count;
+
+     /* add to circular buffer */
+    aesd_circular_buffer_add_entry(buffer, entry);
+
     return retval;
 }
 struct file_operations aesd_fops = {
@@ -105,6 +131,10 @@ int aesd_init_module(void)
     /**
      * TODO: initialize the AESD specific portion of the device
      */
+    buffer = kmalloc(sizeof(struct aesd_circular_buffer), GFP_KERNEL);
+    if(buffer == NULL){
+        return -ENOMEM;
+    }
 
     result = aesd_setup_cdev(&aesd_device);
 
