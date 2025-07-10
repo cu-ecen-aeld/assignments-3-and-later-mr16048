@@ -12,7 +12,7 @@
 #include <time.h>
 #include <pthread.h>
 #define BUF_SIZE 1024
-#define OUT_FILE "/var/tmp/aesdsocketdata"
+#define OUT_FILE "/dev/aesdchar"
 
 static int write_all(int, void *, size_t);
 void sig_handler(int);
@@ -47,7 +47,7 @@ int main(){
   pthread_mutex_init(&mutex, NULL);
 
   // write timestamp every 10s
-  write_prdc_to_file();
+  //write_prdc_to_file();
 
   //set signal handler
   struct sigaction sa;
@@ -126,9 +126,9 @@ CLOSE:
     perror("close sock");
   }
   closelog();
-  if(unlink(OUT_FILE)){
-    err = 1;
-  }
+  // if(unlink(OUT_FILE)){
+  //   err = 1;
+  // }
   syslog(LOG_INFO, "closed sock");
   if(err != 0){    
     return -1;

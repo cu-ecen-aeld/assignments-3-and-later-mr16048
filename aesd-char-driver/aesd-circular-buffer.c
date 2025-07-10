@@ -13,7 +13,6 @@
 #else
 #include <string.h>
 #endif
-
 #include "aesd-circular-buffer.h"
 
 /**
@@ -76,9 +75,9 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 {
     /**
     * TODO: implement per description
-    */
-  buffer->entry[buffer->in_offs] = *add_entry;
-  buffer->in_offs += 1;
+    */  
+    buffer->entry[buffer->in_offs] = *add_entry;
+    buffer->in_offs += 1;
 	buffer->out_offs += 1;
 	if(buffer->in_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 		buffer->in_offs = 0;
@@ -97,4 +96,30 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 void aesd_circular_buffer_init(struct aesd_circular_buffer *buffer)
 {
     memset(buffer,0,sizeof(struct aesd_circular_buffer));
+}
+
+size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *result_buf, size_t len){
+
+	size_t read_len = 0;
+	size_t next_size;
+	struct aesd_buffer_entry next_entry;
+
+	while(1){
+		next_entry = buffer->entry[buffer->out_offs]; 
+		next_size = next_entry.size;
+		if(read_len + next_size >= len){
+			break;
+		}
+		strcat(result_buf, next_entry.buffptr);
+		read_len += next_size;
+		buffer->out_offs += 1;
+		if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
+			buffer->out_offs = 0;        
+		}
+		if(buffer->out_offs >= buffer->in_offs){
+			break;
+		}
+	}
+
+	return read_len;
 }
