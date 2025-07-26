@@ -93,16 +93,20 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     struct mutex *lock = &(dev->lock);
      
      /* set up new entry */
+     PDEBUG("write(): alloc buffer");
      char *kbuf = kmalloc(count, GFP_KERNEL);
      if(kbuf == NULL){
+        PDEBUG("write(): failed for kmalloc");
         return -ENOMEM;
      }
 
      entry.buffptr = kbuf;
 
      /* copy to the new entry */
+     PDEBUG("write(): start copy from user");
      if(copy_from_user(kbuf, buffer, count)){
         retval = -ENOMEM;
+        PDEBUG("write(): failed for copy_from_user");
         return -ENOMEM;
      }
      entry.size = count;
@@ -115,6 +119,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
      }
 
      /* add to circular buffer */
+     PDEBUG("write(): start write to circular buffer");
     aesd_circular_buffer_add_entry(buffer, &entry);
     retval = count;
 
