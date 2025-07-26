@@ -86,6 +86,9 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
      * TODO: handle write
      */
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
+    if(dev == NULL){
+        PDEBUG("write(): dev is NULL");
+    }
     struct aesd_circular_buffer *buffer = dev->buffer;
     struct mutex *lock = &(dev->lock);
      
