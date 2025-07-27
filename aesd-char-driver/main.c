@@ -45,6 +45,10 @@ int aesd_release(struct inode *inode, struct file *filp)
     /**
      * TODO: handle release
      */
+    struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
+    struct aesd_circular_buffer *buffer = dev->buffer;
+    kfree((buffer->entry[buffer->in_offs]).buffptr);
+
     return 0;
 }
 
@@ -119,7 +123,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
          
      /* free if already allocated */
      if(buffer->full){
-        kfree((buffer->entry[buffer->in_offs]).buffptr);        
+        kfree((buffer->entry[buffer->in_offs]).buffptr);
      }
 
      /* add to circular buffer */
