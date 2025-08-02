@@ -131,9 +131,8 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
 
      /* add to circular buffer */
      PDEBUG("write(): start write to circular buffer");
-     #if 0
     aesd_circular_buffer_add_entry(buffer, &entry);
-    #endif
+    
     retval = count;
 
     mutex_unlock(lock);
