@@ -119,7 +119,6 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
      entry.buffptr = kbuf;
 
      /* copy to the new entry */
-     PDEBUG("write(): start copy from user");
 
      PDEBUG("write(): user buf = %p, count = %zu", buf, count);
 
@@ -128,9 +127,10 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         kfree(kbuf);
         return -EFAULT;
     }
+    PDEBUG("write(): start copy from user");
 
      if(copy_from_user(kbuf, buf, count)){
-        retval = -ENOMEM;
+        kfree(kbuf);
         PDEBUG("write(): failed for copy_from_user");
         return -ENOMEM;
      }
