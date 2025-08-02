@@ -81,16 +81,16 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 
     buffer->entry[buffer->in_offs] = *add_entry;
     buffer->in_offs += 1;
-	buffer->out_offs += 1;
+	// buffer->out_offs += 1;
 	if(buffer->in_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 		buffer->in_offs = 0;
 		if(!buffer->full){
 			buffer->full = true;
 		}
   	}
-	if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
-		buffer->out_offs = 0;        
-	}
+	// if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
+	// 	buffer->out_offs = 0;        
+	// }
 }
 
 /**
@@ -125,4 +125,17 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	}
 
 	return read_len;
+}
+
+void aesd_circular_buffer_free(struct aesd_circular_buffer *buffer){
+
+	int i;
+
+	for(i = 0; i< AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED; i++){
+		if((buffer->entry[i]).buffptr != NULL){
+			kfree((buffer->entry[i]).buffptr);
+		}
+	}
+	buffer->in_offs = 0;
+	buffer->out_offs = 0;
 }

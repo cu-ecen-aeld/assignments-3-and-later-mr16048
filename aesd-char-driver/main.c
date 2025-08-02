@@ -54,7 +54,7 @@ int aesd_release(struct inode *inode, struct file *filp)
      */
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     struct aesd_circular_buffer *buffer = dev->buffer;
-    kfree((buffer->entry[buffer->in_offs]).buffptr);
+    aesd_circular_buffer_free(buffer);
 
     return 0;
 }
@@ -218,6 +218,8 @@ void aesd_cleanup_module(void)
     /**
      * TODO: cleanup AESD specific poritions here as necessary
      */
+
+     kfree(aesd_device.buffer);
 
     unregister_chrdev_region(devno, 1);
 }
