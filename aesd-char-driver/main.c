@@ -67,7 +67,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
     /**
      * TODO: handle read
      */
-    #if 0
+
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     struct aesd_circular_buffer *buffer = dev->buffer;
     struct mutex *lock = &(dev->lock);
@@ -77,14 +77,12 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
         return -ENOMEM;
     }
 
-    mutex_lock(lock);
+    //mutex_lock(lock);
     retval = aesd_circular_buffer_raed(buffer, kbuf, count);
-    mutex_unlock(lock);
+    //mutex_unlock(lock);
     if(copy_to_user(buf, kbuf, count)){
         return -ENOMEM;
     }
-    #endif
-    retval = 1;
 
     return retval;
 }
@@ -140,7 +138,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
      entry.size = count;
 
      PDEBUG("write(): start mutex lock");
-     mutex_lock(lock);
+     //mutex_lock(lock);
          
      /* free if already allocated */
      if(buffer->full){
@@ -153,7 +151,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     
     retval = count;
 
-    mutex_unlock(lock);
+    //mutex_unlock(lock);
     return retval;
 }
 struct file_operations aesd_fops = {
