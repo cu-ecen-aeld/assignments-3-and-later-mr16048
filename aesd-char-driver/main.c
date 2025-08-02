@@ -100,7 +100,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         PDEBUG("write(): dev->buffer is null");
         return -ENOMEM;
     }
-#if 0
+
      /* set up new entry */
      PDEBUG("write(): alloc buffer");
      char *kbuf = kmalloc(count, GFP_KERNEL);
@@ -110,7 +110,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
      }
 
      entry.buffptr = kbuf;
-
+#if 0
      /* copy to the new entry */
      PDEBUG("write(): start copy from user");
      if(copy_from_user(kbuf, buf, count)){
