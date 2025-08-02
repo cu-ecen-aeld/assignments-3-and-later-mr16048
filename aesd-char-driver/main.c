@@ -120,7 +120,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         return -ENOMEM;
      }
      entry.size = count;
-
+#if 0
      mutex_lock(lock);
          
      /* free if already allocated */
@@ -134,7 +134,8 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     retval = count;
 
     mutex_unlock(lock);
-
+#endif
+    retval = count;
     return retval;
 }
 struct file_operations aesd_fops = {
