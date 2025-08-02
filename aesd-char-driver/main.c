@@ -92,6 +92,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     if(dev == NULL){
         PDEBUG("write(): dev is NULL");
+        return -ENOMEM;
     }
     struct aesd_circular_buffer *buffer = dev->buffer;
     struct mutex *lock = &(dev->lock);
@@ -99,7 +100,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         PDEBUG("write(): dev->buffer is null");
         return -ENOMEM;
     }
-
+#if 0
      /* set up new entry */
      PDEBUG("write(): alloc buffer");
      char *kbuf = kmalloc(count, GFP_KERNEL);
@@ -132,7 +133,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     retval = count;
 
     mutex_unlock(lock);
-
+#endif
     return retval;
 }
 struct file_operations aesd_fops = {
