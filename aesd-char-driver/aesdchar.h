@@ -5,6 +5,7 @@
  *      Author: Dan Walkes
  */
 #include <linux/mutex.h>
+#include <linux/cdev.h>
 
 #ifndef AESD_CHAR_DRIVER_AESDCHAR_H_
 #define AESD_CHAR_DRIVER_AESDCHAR_H_
