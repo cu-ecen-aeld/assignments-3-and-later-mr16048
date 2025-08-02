@@ -47,7 +47,7 @@ int aesd_release(struct inode *inode, struct file *filp)
      */
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     struct aesd_circular_buffer *buffer = dev->buffer;
-    // kfree((buffer->entry[buffer->in_offs]).buffptr);
+    kfree((buffer->entry[buffer->in_offs]).buffptr);
 
     return 0;
 }
@@ -135,6 +135,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
 
     mutex_unlock(lock);
 #endif
+    retval = count;
     return retval;
 }
 struct file_operations aesd_fops = {
