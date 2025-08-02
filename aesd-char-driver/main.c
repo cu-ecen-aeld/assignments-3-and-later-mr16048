@@ -121,6 +121,14 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
      /* copy to the new entry */
      PDEBUG("write(): start copy from user");
 
+     PDEBUG("write(): user buf = %p, count = %zu", buf, count);
+
+    if (!access_ok(buf, count)) {
+        PDEBUG("write(): user pointer not accessible");
+        kfree(kbuf);
+        return -EFAULT;
+    }
+
      if(copy_from_user(kbuf, buf, count)){
         retval = -ENOMEM;
         PDEBUG("write(): failed for copy_from_user");
