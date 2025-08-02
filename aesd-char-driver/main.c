@@ -113,7 +113,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
 
      /* copy to the new entry */
      PDEBUG("write(): start copy from user");
-#if 0
+
      if(copy_from_user(kbuf, buf, count)){
         retval = -ENOMEM;
         PDEBUG("write(): failed for copy_from_user");
@@ -134,8 +134,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     retval = count;
 
     mutex_unlock(lock);
-#endif
-    retval = count;
+
     return retval;
 }
 struct file_operations aesd_fops = {
