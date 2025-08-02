@@ -67,6 +67,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
     /**
      * TODO: handle read
      */
+    #if 0
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     struct aesd_circular_buffer *buffer = dev->buffer;
     struct mutex *lock = &(dev->lock);
@@ -82,6 +83,8 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
     if(copy_to_user(buf, kbuf, count)){
         return -ENOMEM;
     }
+    #endif
+    retval = 1;
 
     return retval;
 }
