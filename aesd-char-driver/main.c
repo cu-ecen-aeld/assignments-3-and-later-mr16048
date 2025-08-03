@@ -72,15 +72,23 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     struct aesd_circular_buffer *buffer = dev->buffer;
     struct mutex *lock = &(dev->lock);
+     
+    if(buffer == NULL){
+        PDEBUG("read(): dev->buffer is null");
+        return -ENOMEM;
+    }
 
     char *kbuf = kmalloc(count, GFP_KERNEL);
     if(kbuf == NULL){
+        PDEBUG("read(): dev->buffer is null");
         return -ENOMEM;
     }
 
     //mutex_lock(lock);
+    PDEBUG("read(): start read from cir buffer");
     retval = aesd_circular_buffer_raed(buffer, kbuf, count);
     //mutex_unlock(lock);
+    PDEBUG("read(): start copy to user buffer");
     if(copy_to_user(buf, kbuf, count)){
         return -ENOMEM;
     }
@@ -220,7 +228,7 @@ void aesd_cleanup_module(void)
      * TODO: cleanup AESD specific poritions here as necessary
      */
 
-     //kfree(aesd_device.buffer);
+     kfree(aesd_device.buffer);
 
     unregister_chrdev_region(devno, 1);
 }
