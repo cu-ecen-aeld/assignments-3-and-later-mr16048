@@ -123,7 +123,8 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 			buffer->out_offs = 0;        
 		}
 		if(buffer->out_offs >= buffer->in_offs){
-			PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
+			// PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
+			PDEBUG("aesd_circular_buffer_raed(): break");
 			break;
 		}
 		PDEBUG("aesd_circular_buffer_raed(): 2");
