@@ -80,6 +80,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
 
     char *kbuf = kmalloc(count, GFP_KERNEL);
     if(kbuf == NULL){
+        kfree(kbuf);
         PDEBUG("read(): dev->buffer is null");
         return -ENOMEM;
     }
@@ -88,6 +89,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
     PDEBUG("read(): start read from cir buffer");
     retval = aesd_circular_buffer_raed(buffer, kbuf, count);
     //mutex_unlock(lock);
+    kfree(kbuf);
     PDEBUG("read(): start copy to user buffer");
     if(copy_to_user(buf, kbuf, count)){
         return -ENOMEM;
