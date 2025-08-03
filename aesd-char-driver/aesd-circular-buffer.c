@@ -108,12 +108,14 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	size_t next_size;
 	struct aesd_buffer_entry next_entry;
 
+	PDEBUG("aesd_circular_buffer_raed(): 1");
 	while(1){
 		next_entry = buffer->entry[buffer->out_offs]; 
 		next_size = next_entry.size;
 		if(read_len + next_size >= len){
 			break;
 		}
+		PDEBUG("aesd_circular_buffer_raed(): 1");
 		strcat(result_buf, next_entry.buffptr);
 		read_len += next_size;
 		buffer->out_offs += 1;
@@ -123,6 +125,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		if(buffer->out_offs >= buffer->in_offs){
 			break;
 		}
+		PDEBUG("aesd_circular_buffer_raed(): 2");
 	}
 
 	return read_len;
