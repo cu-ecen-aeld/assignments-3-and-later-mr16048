@@ -117,6 +117,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		}
 		PDEBUG("aesd_circular_buffer_raed(): 1");
 		strcat(result_buf, next_entry.buffptr);
+		PDEBUG("aesd_circular_buffer_raed(): 2.5");
 		read_len += next_size;
 		buffer->out_offs += 1;
 		if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
