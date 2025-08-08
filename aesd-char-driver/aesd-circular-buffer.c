@@ -116,6 +116,10 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 			break;
 		}
 		PDEBUG("aesd_circular_buffer_raed(): 1");
+		if(next_entry.buffptr == NULL){
+			PDEBUG("aesd_circular_buffer_raed(): 2.1");
+			break;
+		}
 		strcat(result_buf, next_entry.buffptr);
 		PDEBUG("aesd_circular_buffer_raed(): 2.5");
 		read_len += next_size;
