@@ -92,6 +92,8 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 	// if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 	// 	buffer->out_offs = 0;        
 	// }
+	PDEBUG("aesd_circular_buffer_add_entry() in_ofs: %d", buffer->in_offs);
+	PDEBUG("aesd_circular_buffer_add_entry() out_ofs: %d", buffer->out_offs);
 }
 
 /**
@@ -136,6 +138,8 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		PDEBUG("aesd_circular_buffer_raed(): 3");
 	}
 	PDEBUG("aesd_circular_buffer_raed(): read %dbytes", read_len);
+	PDEBUG("aesd_circular_buffer_raed() in_ofs: %d", buffer->in_offs);
+	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
 
 	return read_len;
 }
