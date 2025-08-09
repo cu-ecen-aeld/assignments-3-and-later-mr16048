@@ -154,6 +154,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
          
      /* free if already allocated */
      if(buffer->full){
+        PDEBUG("write(): free old mem");
         kfree((buffer->entry[buffer->in_offs]).buffptr);
      }
 
