@@ -91,7 +91,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
     //mutex_unlock(lock);
 
     PDEBUG("read(): start copy to user buffer");
-    if(copy_to_user(buf, kbuf, count)){
+    if(copy_to_user(buf, kbuf, retval)){
         retval = -ENOMEM;
     }
     kfree(kbuf);
