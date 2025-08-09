@@ -135,6 +135,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		}
 		PDEBUG("aesd_circular_buffer_raed(): 3");
 	}
+	PDEBUG("aesd_circular_buffer_raed(): read %dbytes", read_len);
 
 	return read_len;
 }
