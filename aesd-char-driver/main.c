@@ -120,6 +120,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         PDEBUG("write(): dev->buffer is null");
         return -ENOMEM;
     }
+    PDEBUG("write(): buffer inofs = %d, outofs = %d, full = %d", buffer->in_offs, buffer->out_offs, buffer->full);
 
      /* set up new entry */
      PDEBUG("write(): alloc buffer");
@@ -211,6 +212,7 @@ int aesd_init_module(void)
     if(aesd_device.buffer == NULL){
         return -ENOMEM;
     }
+    aesd_circular_buffer_init(aesd_device.buffer);
     mutex_init(&aesd_device.lock);
 
     result = aesd_setup_cdev(&aesd_device);
