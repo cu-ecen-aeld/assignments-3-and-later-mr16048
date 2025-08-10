@@ -43,7 +43,8 @@ int aesd_open(struct inode *inode, struct file *filp)
     /**
      * TODO: handle open
      */
-    filp->private_data = container_of(inode->i_cdev, struct aesd_dev, cdev);
+    //filp->private_data = container_of(inode->i_cdev, struct aesd_dev, cdev);
+    filp->private_data = &aesd_device;
     return 0;
 }
 
