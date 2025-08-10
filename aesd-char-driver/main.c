@@ -84,6 +84,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
         PDEBUG("read(): dev->buffer is null");
         return -ENOMEM;
     }
+    memset(kbuf, 0, count);
 
     //mutex_lock(lock);
     PDEBUG("read(): start read from cir buffer");
@@ -142,6 +143,8 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         kfree(kbuf);
         return -EFAULT;
     }
+    memset(kbuf, 0, count);
+    
     PDEBUG("write(): start copy from user");
 
      if(copy_from_user(kbuf, buf, count)){
