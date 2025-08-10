@@ -122,7 +122,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         PDEBUG("write(): dev->buffer is null");
         return -ENOMEM;
     }
-    PDEBUG("write(): buffer inofs = %d, outofs = %d, full = %d", buffer->in_offs, buffer->out_offs, buffer->full);
+    PDEBUG("write(): buffer adr = %p inofs = %d, outofs = %d, full = %d", buffer, buffer->in_offs, buffer->out_offs, buffer->full);
 
      /* set up new entry */
      PDEBUG("write(): alloc buffer");
@@ -144,7 +144,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         return -EFAULT;
     }
     memset(kbuf, 0, count);
-    
+
     PDEBUG("write(): start copy from user");
 
      if(copy_from_user(kbuf, buf, count)){

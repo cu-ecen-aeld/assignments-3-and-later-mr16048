@@ -112,6 +112,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	struct aesd_buffer_entry next_entry;
 
 	PDEBUG("aesd_circular_buffer_raed(): 0");
+	PDEBUG("aesd_circular_buffer_raed() cir_before: %p", buffer);
 	PDEBUG("aesd_circular_buffer_raed() res_buffer_before: %s", result_buf);
 	while(1){
 		next_entry = buffer->entry[buffer->out_offs]; 
