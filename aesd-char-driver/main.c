@@ -87,6 +87,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
 
     //mutex_lock(lock);
     PDEBUG("read(): start read from cir buffer");
+    PDEBUG("read(): initial kbuf: %s", kbuf);
     retval = aesd_circular_buffer_raed(buffer, kbuf, count);
     //mutex_unlock(lock);
 
