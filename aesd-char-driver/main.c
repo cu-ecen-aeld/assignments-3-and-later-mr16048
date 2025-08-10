@@ -79,6 +79,8 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
         return -ENOMEM;
     }
 
+    PDEBUG("read(): buffer adr = %p inofs = %d, outofs = %d, full = %d", buffer, buffer->in_offs, buffer->out_offs, buffer->full);
+
     char *kbuf = kmalloc(count, GFP_KERNEL);
     if(kbuf == NULL){
         kfree(kbuf);
@@ -167,6 +169,8 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
      /* add to circular buffer */
      PDEBUG("write(): start write to circular buffer");
     aesd_circular_buffer_add_entry(buffer, &entry);
+
+    PDEBUG("write(): buffer after adr = %p inofs = %d, outofs = %d, full = %d", buffer, buffer->in_offs, buffer->out_offs, buffer->full);
     
     retval = count;
 
