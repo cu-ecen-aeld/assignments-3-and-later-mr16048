@@ -85,13 +85,11 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 	// buffer->out_offs += 1;
 	if(buffer->in_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 		buffer->in_offs = 0;
-		if(!buffer->full){
-			buffer->full = true;
-		}
   	}
-	// if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
-	// 	buffer->out_offs = 0;        
-	// }
+	if(buffer->in_offs == buffer->out_offs){
+		buffer->full = true;
+	}
+
 	PDEBUG("aesd_circular_buffer_add_entry() in_ofs: %d", buffer->in_offs);
 	PDEBUG("aesd_circular_buffer_add_entry() out_ofs: %d", buffer->out_offs);
 	PDEBUG("aesd_circular_buffer_add_entry() entry: %s", add_entry->buffptr);
@@ -114,11 +112,13 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	PDEBUG("aesd_circular_buffer_raed(): 0");
 	PDEBUG("aesd_circular_buffer_raed() cir_before: %p", buffer);
 	PDEBUG("aesd_circular_buffer_raed() res_buffer_before: %s", result_buf);
+
+	if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
+		PDEBUG("aesd_circular_buffer_raed(): 1 no data to read");
+		return 0;
+	}
+
 	while(1){
-		if((buffer->full != 0) && (buffer->in_offs == 0)){
-			PDEBUG("aesd_circular_buffer_raed(): no data, break");
-			break;
-		}
 		next_entry = buffer->entry[buffer->out_offs]; 
 		next_size = next_entry.size;
 		if(read_len + next_size >= len){
@@ -138,6 +138,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		}
 		if(buffer->out_offs >= buffer->in_offs){
 			// PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
+			buffer->full = false;
 			PDEBUG("aesd_circular_buffer_raed(): read all data, break");
 			break;
 		}
