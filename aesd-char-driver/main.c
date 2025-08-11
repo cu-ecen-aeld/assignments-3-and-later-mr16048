@@ -54,9 +54,9 @@ int aesd_release(struct inode *inode, struct file *filp)
     /**
      * TODO: handle release
      */
-    struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
-    struct aesd_circular_buffer *buffer = dev->buffer;
-    aesd_circular_buffer_free(buffer);
+    // struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
+    // struct aesd_circular_buffer *buffer = dev->buffer;
+    // aesd_circular_buffer_free(buffer);
 
     return 0;
 }
