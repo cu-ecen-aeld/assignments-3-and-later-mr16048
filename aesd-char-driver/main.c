@@ -72,6 +72,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
 
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     struct aesd_circular_buffer *buffer = dev->buffer;
+    buffer = aesd_device.buffer;
     struct mutex *lock = &(dev->lock);
      
     if(buffer == NULL){
@@ -120,6 +121,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         return -ENOMEM;
     }
     struct aesd_circular_buffer *buffer = dev->buffer;
+    buffer = aesd_device.buffer;
     struct mutex *lock = &(dev->lock);
     if(buffer == NULL){
         PDEBUG("write(): dev->buffer is null");
