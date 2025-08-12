@@ -22,6 +22,8 @@
 #include <linux/slab.h>
 #include "aesdchar.h"
 #include "aesd-circular-buffer.h"
+
+
 int aesd_major =   0; // use dynamic major
 int aesd_minor =   0;
 
@@ -74,6 +76,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
     struct aesd_circular_buffer *buffer = dev->buffer;
     buffer = aesd_device.buffer;
     struct mutex *lock = &(dev->lock);
+    char *tmp_ubuf;
      
     if(buffer == NULL){
         PDEBUG("read(): dev->buffer is null");
@@ -231,6 +234,7 @@ int aesd_init_module(void)
     if( result ) {
         unregister_chrdev_region(dev, 1);
     }
+
     return result;
 
 }

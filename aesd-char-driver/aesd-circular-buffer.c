@@ -108,6 +108,9 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	size_t read_len = 0;
 	size_t next_size;
 	struct aesd_buffer_entry next_entry;
+	uint8_t startp;
+	int copy_start;
+	size_t copy_len;
 
 	PDEBUG("aesd_circular_buffer_raed(): 0");
 	PDEBUG("aesd_circular_buffer_raed() cir_before: %p", buffer);
@@ -118,30 +121,49 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		return 0;
 	}
 
+	startp = buffer->out_offs;
+	copy_start = strlen(result_buf);
+
 	while(1){
 		next_entry = buffer->entry[buffer->out_offs]; 
 		next_size = next_entry.size;
-		if(read_len + next_size >= len){
-			break;
-		}
+
 		PDEBUG("aesd_circular_buffer_raed(): 1");
 		if(next_entry.buffptr == NULL){
 			PDEBUG("aesd_circular_buffer_raed(): 2.1");
 			break;
 		}
-		strcat(result_buf, next_entry.buffptr);
+		
+		if(read_len + next_size >= len){
+			copy_len = len - read_len;
+		}
+		else{
+			copy_len = next_size;
+		}
+
+		memcpy(result_buf + copy_start + read_len, next_entry.buffptr, copy_len);
+
 		PDEBUG("aesd_circular_buffer_raed(): 2.5");
-		read_len += next_size;
+		read_len += copy_len;
 		buffer->out_offs += 1;
 		if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 			buffer->out_offs = 0;        
 		}
-		if(buffer->out_offs >= buffer->in_offs){
-			// PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
+		if(buffer->out_offs == startp){
 			buffer->full = false;
 			PDEBUG("aesd_circular_buffer_raed(): read all data, break");
 			break;
 		}
+		if(read_len >= len){
+			PDEBUG("aesd_circular_buffer_raed(): read specified length of data, break");
+			break;	
+		}
+		// if(buffer->out_offs >= buffer->in_offs){
+		// 	// PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
+		// 	buffer->full = false;
+		// 	PDEBUG("aesd_circular_buffer_raed(): read all data, break");
+		// 	break;
+		// }
 
 		PDEBUG("aesd_circular_buffer_raed(): 3");
 	}
