@@ -109,7 +109,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	size_t next_size;
 	struct aesd_buffer_entry next_entry;
 	uint8_t startp;
-	// int copy_start;
+	int copy_start;
 	size_t copy_len;
 
 	PDEBUG("aesd_circular_buffer_raed(): 0");
@@ -163,7 +163,6 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		if(buffer->out_offs == buffer->in_offs){
 			// PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
 			buffer->full = false;
-			PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
 			PDEBUG("aesd_circular_buffer_raed(): read all data, break");
 			break;
 		}
