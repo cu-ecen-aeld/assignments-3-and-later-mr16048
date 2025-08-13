@@ -150,6 +150,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 			buffer->out_offs = 0;        
 		}
+		PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
 		// if(buffer->out_offs == startp){
 		// 	buffer->full = false;
 		// 	PDEBUG("aesd_circular_buffer_raed(): read all data, break");
