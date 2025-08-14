@@ -153,6 +153,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	if(startp < 0){
 		return 0;
 	}
+	buffer->out_offs = startp;
 	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
 	copy_start = strlen(result_buf);
 
