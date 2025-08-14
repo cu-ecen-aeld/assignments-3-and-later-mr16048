@@ -163,7 +163,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		return 0;
 	}
 
-	startp = aesd_circular_buffer_find_entry_offset_and_index_for_fpos(buffer, f_pos, &start_byte_ofs);
+	startp = aesd_circular_buffer_find_entry_offset_and_index_for_fpos(buffer, *f_pos, &start_byte_ofs);
 	if(startp < 0){
 		return 0;
 	}
