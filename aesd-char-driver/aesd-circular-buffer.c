@@ -96,7 +96,7 @@ int aesd_circular_buffer_find_entry_offset_and_index_for_fpos(struct aesd_circul
 		for (i = buffer->out_offs; i < buffer->in_offs; i++){
 			if(total_len + buffer->entry[i].size > char_offset){
 				*entry_offset_byte_rtn = char_offset - total_len;
-				return &(buffer->entry[i]);
+				return i;
 			}
 			total_len += buffer->entry[i].size;
 		}
