@@ -66,6 +66,45 @@ struct aesd_buffer_entry *aesd_circular_buffer_find_entry_offset_for_fpos(struct
 	return NULL;
 }
 
+int aesd_circular_buffer_find_entry_offset_and_index_for_fpos(struct aesd_circular_buffer *buffer,
+            size_t char_offset, size_t *entry_offset_byte_rtn )
+{
+    /**
+    * TODO: implement per description
+    */
+	int i;
+	int total_len;
+
+	total_len = 0;
+	if(buffer->in_offs <= buffer->out_offs){
+		for (i = buffer->out_offs; i < AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED; i++){
+			if(total_len + buffer->entry[i].size > char_offset){
+				*entry_offset_byte_rtn = char_offset - total_len;
+				return i;
+			}
+			total_len += buffer->entry[i].size;
+		}
+		for (i = 0; i < buffer->in_offs; i++){
+			if(total_len + buffer->entry[i].size > char_offset){
+				*entry_offset_byte_rtn = char_offset - total_len;
+				return i;
+			}
+			total_len += buffer->entry[i].size;
+		}
+	}
+	else{
+		for (i = buffer->out_offs; i < buffer->in_offs; i++){
+			if(total_len + buffer->entry[i].size > char_offset){
+				*entry_offset_byte_rtn = char_offset - total_len;
+				return &(buffer->entry[i]);
+			}
+			total_len += buffer->entry[i].size;
+		}
+	}
+
+	return -1;
+}
+
 /**
 * Adds entry @param add_entry to @param buffer in the location specified in buffer->in_offs.
 * If the buffer was already full, overwrites the oldest entry and advances buffer->out_offs to the
@@ -103,25 +142,25 @@ void aesd_circular_buffer_init(struct aesd_circular_buffer *buffer)
     memset(buffer,0,sizeof(struct aesd_circular_buffer));
 }
 
-size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *result_buf, size_t len){
+size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *result_buf, size_t len, loff_t *f_pos){
 
 	size_t read_len = 0;
 	size_t next_size;
+	size_t start_byte_ofs;
 	struct aesd_buffer_entry next_entry;
 	uint8_t startp;
 	int copy_start;
 	size_t copy_len;
 
 	PDEBUG("aesd_circular_buffer_raed(): 0");
-	PDEBUG("aesd_circular_buffer_raed() cir_before: %p", buffer);
-	PDEBUG("aesd_circular_buffer_raed() res_buffer_before: %s", result_buf);
 
 	if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
 		PDEBUG("aesd_circular_buffer_raed(): 1 no data to read");
 		return 0;
 	}
 
-	startp = buffer->out_offs;
+	buffer->out_offs = aesd_circular_buffer_find_entry_offset_and_index_for_fpos(buffer, f_pos, &start_byte_ofs);
+	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
 	copy_start = strlen(result_buf);
 
 	while(1){
@@ -150,7 +189,6 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 			buffer->out_offs = 0;        
 		}
-		PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
 		// if(buffer->out_offs == startp){
 		// 	buffer->full = false;
 		// 	PDEBUG("aesd_circular_buffer_raed(): read all data, break");
@@ -169,6 +207,9 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 
 		PDEBUG("aesd_circular_buffer_raed(): 3");
 	}
+
+	*f_pos = buffer->out_offs;
+
 	PDEBUG("aesd_circular_buffer_raed(): read %dbytes", read_len);
 	PDEBUG("aesd_circular_buffer_raed() in_ofs: %d", buffer->in_offs);
 	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
