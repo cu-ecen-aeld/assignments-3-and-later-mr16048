@@ -78,6 +78,7 @@ int aesd_circular_buffer_find_entry_offset_and_index_for_fpos(struct aesd_circul
 	total_len = 0;
 	PDEBUG("aesd_circular_buffer_find_index(): out_ofs = %d, in_ofs = %d, char_offset = %d", buffer->out_offs, buffer->in_offs, char_offset);
 	
+	i = buffer->in_offs;
 	while(1){
 		if(total_len + buffer->entry[i].size > char_offset){
 			*entry_offset_byte_rtn = char_offset - total_len;
