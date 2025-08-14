@@ -77,34 +77,20 @@ int aesd_circular_buffer_find_entry_offset_and_index_for_fpos(struct aesd_circul
 
 	total_len = 0;
 	PDEBUG("aesd_circular_buffer_find_index(): out_ofs = %d, in_ofs = %d, char_offset = %d", buffer->out_offs, buffer->in_offs, char_offset);
-	if(buffer->in_offs <= buffer->out_offs){
-		PDEBUG("aesd_circular_buffer_find_index(): 1");
-		for (i = buffer->out_offs; i < AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED; i++){
-			if(total_len + buffer->entry[i].size > char_offset){
-				*entry_offset_byte_rtn = char_offset - total_len;
-				return i;
-			}
-			total_len += buffer->entry[i].size;
+	
+	while(1){
+		if(total_len + buffer->entry[i].size > char_offset){
+			*entry_offset_byte_rtn = char_offset - total_len;
+			PDEBUG("aesd_circular_buffer_find_index(): find %d", i);
+			return i;
 		}
-		for (i = 0; i < buffer->in_offs; i++){
-			if(total_len + buffer->entry[i].size > char_offset){
-				*entry_offset_byte_rtn = char_offset - total_len;
-				return i;
-			}
-			total_len += buffer->entry[i].size;
+
+		total_len += buffer->entry[i].size;
+		i++;
+		if(i >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
+			i = 0;
 		}
-	}
-	else{
-		PDEBUG("aesd_circular_buffer_find_index(): 2");
-		for (i = buffer->out_offs; i < buffer->in_offs; i++){
-			if(total_len + buffer->entry[i].size > char_offset){
-				*entry_offset_byte_rtn = char_offset - total_len;
-				PDEBUG("aesd_circular_buffer_find_index(): find %d", i);
-				return i;
-			}
-			total_len += buffer->entry[i].size;
-		}
-	}
+	}	
 
 	return -1;
 }
