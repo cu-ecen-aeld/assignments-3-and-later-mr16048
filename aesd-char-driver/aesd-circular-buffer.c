@@ -129,9 +129,9 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 	}
 	memcpy(tmp_entry.buffptr + tmp_entry.size, add_entry->buffptr, add_entry->size);
 	tmp_entry.size = new_size;
-	if(current_str != NULL){
-		kfree(current_str);
-	}
+	// if(current_str != NULL){
+	// 	kfree(current_str);
+	// }
 
 	PDEBUG("aesd_circular_buffer_add_entry adding buffer: %s", add_entry->buffptr);
 	PDEBUG("aesd_circular_buffer_add_entry result buffer: %s", tmp_entry.buffptr);
