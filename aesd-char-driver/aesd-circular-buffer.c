@@ -147,7 +147,7 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 		target->buffptr = kmalloc(tmp_entry.size, GFP_KERNEL);
 		memcpy(target->buffptr, tmp_entry.buffptr, tmp_entry.size);
 		target->size = tmp_entry.size;
-		PDEBUG("aesd_circular_buffer_add_entry add buffered to entry");
+		PDEBUG("aesd_circular_buffer_add_entry after add: %s", target->buffptr);
 		aesd_init_entry(&tmp_entry);
 		
 		buffer->in_offs += 1;	
