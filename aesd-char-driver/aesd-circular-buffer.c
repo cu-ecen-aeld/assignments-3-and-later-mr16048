@@ -21,6 +21,8 @@
 // aesd_buffer_link_entry *tmp_last_node;
 struct aesd_buffer_entry tmp_entry;
 
+static void aesd_init_entry(struct aesd_buffer_entry *);
+
 // static int aesd_gen_new_link_node(aesd_buffer_link_entry *);
 
 /**
@@ -154,6 +156,7 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 
 		buffer->entry[buffer->in_offs] = tmp_entry;
 		PDEBUG("aesd_circular_buffer_add_entry add buffered to entry");
+		aesd_init_entry(&tmp_entry);
 		
 		buffer->in_offs += 1;	
 		// buffer->out_offs += 1;
@@ -176,9 +179,7 @@ int aesd_circular_buffer_init(struct aesd_circular_buffer *buffer)
 {
     memset(buffer,0,sizeof(struct aesd_circular_buffer));
 
-	// if(aesd_gen_new_link_node(tmp_top_node) != 0){
-	// 	return -ENOMEM;
-	// }
+	aesd_init_entry(&tmp_entry);
 
 	return 0;
 }
@@ -279,12 +280,10 @@ void aesd_circular_buffer_free(struct aesd_circular_buffer *buffer){
 	buffer->out_offs = 0;
 }
 
-// static int aesd_gen_new_link_node(aesd_buffer_link_entry *new_node){
+static void aesd_init_entry(struct aesd_buffer_entry *entry){
 
-// 	new_node = kmalloc(sizeof(aesd_buffer_link_entry), GFP_KERNEL);
-// 	if(new_node == NULL){
-// 		return -ENOMEM;
-// 	}
-// 	new_node->next = NULL
-// 	return 0;
-// }
+	if(entry->buffptr != NULL){
+		kfree(entry->buffptr);
+	}
+	entry->size = 0;
+}
