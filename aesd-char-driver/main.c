@@ -226,7 +226,9 @@ int aesd_init_module(void)
     if(aesd_device.buffer == NULL){
         return -ENOMEM;
     }
-    aesd_circular_buffer_init(aesd_device.buffer);
+    if(aesd_circular_buffer_init(aesd_device.buffer) != 0){
+        return -ENOMEM;
+    }
     mutex_init(&aesd_device.lock);
 
     result = aesd_setup_cdev(&aesd_device);

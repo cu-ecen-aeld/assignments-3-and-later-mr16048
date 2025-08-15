@@ -17,6 +17,12 @@
 #include "aesd-circular-buffer.h"
 #include "aesdchar.h"
 
+// aesd_buffer_link_entry *tmp_top_node;
+// aesd_buffer_link_entry *tmp_last_node;
+struct aesd_buffer_entry tmp_entry;
+
+// static int aesd_gen_new_link_node(aesd_buffer_link_entry *);
+
 /**
  * @param buffer the buffer to search for corresponding offset.  Any necessary locking must be performed by caller.
  * @param char_offset the position to search for in the buffer list, describing the zero referenced
@@ -108,15 +114,47 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
     /**
     * TODO: implement per description
     */  
+
+	// aesd_buffer_link_entry *buffered_entry;
+	// aesd_buffer_link_entry *new_node;
+	// aesd_buffer_entry *target_entry;
+	char *current_str;
+	size_t new_size;
+
 	PDEBUG("aesd_circular_buffer_add_entry(): 1");
-	PDEBUG("aesd_circular_buffer_add_entry() before add: %s", buffer->entry[buffer->in_offs].buffptr);
-	strcat(buffer->entry[buffer->in_offs].buffptr, add_entry->buffptr);
-	buffer->entry[buffer->in_offs].size += add_entry->size;
-	PDEBUG("aesd_circular_buffer_add_entry() adding: %s", add_entry->buffptr);
-	PDEBUG("aesd_circular_buffer_add_entry() after add: %s", buffer->entry[buffer->in_offs].buffptr);
+
+	// if(aesd_gen_new_link_node(new_node) != 0){
+	// 	return -ENOMEM;
+	// }
+	// new_node->entry = *add_entry;
+
+	// tmp_last_node->next = new_node;
+	// tmp_last_node = new_node;
+	
+	current_str = tmp_entry.buffptr;	
+	PDEBUG("aesd_circular_buffer_add_entry current buffer: %s", current_str);
+	new_size = tmp_entry.size + add_entry->size;
+	tmp_entry.buffptr = kmalloc(new_size, GFP_KERNEL);
+	memset(tmp_entry.buffptr, 0, new_size);
+	if(current_str != NULL){
+		memcpy(tmp_entry.buffptr, current_str, tmp_entry.size);
+	}
+	memcpy(tmp_entry.buffptr + tmp_entry.size, add_entry->buffptr, add_entry->size);
+	tmp_entry.size = new_size;
+	if(current_str != NULL){
+		kfree(current_str);
+	}
+
+	PDEBUG("aesd_circular_buffer_add_entry adding buffer: %s", add_entry->buffptr);
+	PDEBUG("aesd_circular_buffer_add_entry result buffer: %s", tmp_entry.buffptr);
+
 	// buffer->entry[buffer->in_offs] = *add_entry;
 	char last_char = add_entry->buffptr[add_entry->size - 1];
 	if(last_char == '\n'){
+
+		buffer->entry[buffer->in_offs] = tmp_entry;
+		PDEBUG("aesd_circular_buffer_add_entry add buffered to entry");
+		
 		buffer->in_offs += 1;	
 		// buffer->out_offs += 1;
 		if(buffer->in_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
@@ -134,9 +172,15 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 /**
 * Initializes the circular buffer described by @param buffer to an empty struct
 */
-void aesd_circular_buffer_init(struct aesd_circular_buffer *buffer)
+int aesd_circular_buffer_init(struct aesd_circular_buffer *buffer)
 {
     memset(buffer,0,sizeof(struct aesd_circular_buffer));
+
+	// if(aesd_gen_new_link_node(tmp_top_node) != 0){
+	// 	return -ENOMEM;
+	// }
+
+	return 0;
 }
 
 size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *result_buf, size_t len, loff_t *f_pos){
@@ -234,3 +278,13 @@ void aesd_circular_buffer_free(struct aesd_circular_buffer *buffer){
 	buffer->in_offs = 0;
 	buffer->out_offs = 0;
 }
+
+// static int aesd_gen_new_link_node(aesd_buffer_link_entry *new_node){
+
+// 	new_node = kmalloc(sizeof(aesd_buffer_link_entry), GFP_KERNEL);
+// 	if(new_node == NULL){
+// 		return -ENOMEM;
+// 	}
+// 	new_node->next = NULL
+// 	return 0;
+// }

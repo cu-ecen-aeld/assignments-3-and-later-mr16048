@@ -30,6 +30,11 @@ struct aesd_buffer_entry
     size_t size;
 };
 
+// struct aesd_buffer_link_entry{
+//     aesd_buffer_entry entry;
+//     aesd_buffer_link_entry *next;
+// }
+
 struct aesd_circular_buffer
 {
     /**
@@ -59,7 +64,7 @@ extern int aesd_circular_buffer_find_entry_offset_and_index_for_fpos(struct aesd
 
 extern void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const struct aesd_buffer_entry *add_entry);
 
-extern void aesd_circular_buffer_init(struct aesd_circular_buffer *buffer);
+extern int aesd_circular_buffer_init(struct aesd_circular_buffer *buffer);
 extern size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *result_buf, size_t len, loff_t *);
 extern void aesd_circular_buffer_free(struct aesd_circular_buffer *buffer);
 /**
