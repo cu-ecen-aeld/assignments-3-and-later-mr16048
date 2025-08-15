@@ -30,11 +30,6 @@ struct aesd_buffer_entry
     size_t size;
 };
 
-// struct aesd_buffer_link_entry{
-//     aesd_buffer_entry entry;
-//     aesd_buffer_link_entry *next;
-// }
-
 struct aesd_circular_buffer
 {
     /**

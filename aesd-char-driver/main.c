@@ -166,14 +166,15 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
      //mutex_lock(lock);
          
      /* free if already allocated */
-     if(buffer->full){
-        PDEBUG("write(): free old mem");
-        kfree((buffer->entry[buffer->in_offs]).buffptr);
-     }
+    //  if(buffer->full){
+    //     PDEBUG("write(): free old mem");
+    //     kfree((buffer->entry[buffer->in_offs]).buffptr);
+    //  }
 
      /* add to circular buffer */
      PDEBUG("write(): start write to circular buffer");
     aesd_circular_buffer_add_entry(buffer, &entry);
+    kfree(kbuf);
 
     PDEBUG("write(): buffer after adr = %p inofs = %d, outofs = %d, full = %d", buffer, buffer->in_offs, buffer->out_offs, buffer->full);
     

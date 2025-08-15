@@ -17,13 +17,9 @@
 #include "aesd-circular-buffer.h"
 #include "aesdchar.h"
 
-// aesd_buffer_link_entry *tmp_top_node;
-// aesd_buffer_link_entry *tmp_last_node;
 struct aesd_buffer_entry tmp_entry;
 
 static void aesd_init_entry(struct aesd_buffer_entry *);
-
-// static int aesd_gen_new_link_node(aesd_buffer_link_entry *);
 
 /**
  * @param buffer the buffer to search for corresponding offset.  Any necessary locking must be performed by caller.
@@ -117,21 +113,10 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
     * TODO: implement per description
     */  
 
-	// aesd_buffer_link_entry *buffered_entry;
-	// aesd_buffer_link_entry *new_node;
-	// aesd_buffer_entry *target_entry;
 	char *current_str;
 	size_t new_size;
 
 	PDEBUG("aesd_circular_buffer_add_entry(): 1");
-
-	// if(aesd_gen_new_link_node(new_node) != 0){
-	// 	return -ENOMEM;
-	// }
-	// new_node->entry = *add_entry;
-
-	// tmp_last_node->next = new_node;
-	// tmp_last_node = new_node;
 	
 	current_str = tmp_entry.buffptr;	
 	PDEBUG("aesd_circular_buffer_add_entry current buffer: %s", current_str);
