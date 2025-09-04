@@ -22,10 +22,12 @@
 #include <linux/slab.h>
 #include "aesdchar.h"
 #include "aesd-circular-buffer.h"
-
+#include "aesd_ioctl.h"
 
 int aesd_major =   0; // use dynamic major
 int aesd_minor =   0;
+
+#define SPECIAL_STR_PREFIX "AESDCHAR_IOCSEEKTO"
 
 MODULE_AUTHOR("Your Name Here"); /** TODO: fill in your name **/
 MODULE_LICENSE("Dual BSD/GPL");
@@ -38,6 +40,9 @@ ssize_t aesd_read(struct file *, char __user *, size_t, loff_t *);
 ssize_t aesd_write(struct file *, const char __user *, size_t, loff_t *);
 int aesd_init_module(void);
 void aesd_cleanup_module(void);
+static loff_t aesd_llseek(struct file *, loff_t, int);
+static long aesd_unlocked_ioctl(struct file *, unsigned int, unsigned long);
+static int aesd_check_special_str(char *, unsigned int, unsigned int *, unsigned int *);
 
 int aesd_open(struct inode *inode, struct file *filp)
 {
@@ -173,6 +178,12 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
 
      /* add to circular buffer */
      PDEBUG("write(): start write to circular buffer");
+
+    struct aesd_seekto seekto;
+    if(aesd_check_special_str(kbuf, count, &seekto.write_cmd, &seekto.write_cmd_offset) == 0){
+        aesd_unlocked_ioctl(filp, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
+    }
+
     aesd_circular_buffer_add_entry(buffer, &entry);
     kfree(kbuf);
 
@@ -183,12 +194,136 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     //mutex_unlock(lock);
     return retval;
 }
+static loff_t aesd_llseek(struct file *file, loff_t off, int whence)
+{
+    struct aesd_dev *dev = (struct aesd_dev *)file->private_data;
+    if(dev == NULL){
+        PDEBUG("lseek(): dev is NULL");
+        return -ENOMEM;
+    }
+    struct aesd_circular_buffer *buffer = dev->buffer;
+    buffer = aesd_device.buffer;
+    struct mutex *lock = &(dev->lock);
+    if(buffer == NULL){
+        PDEBUG("lseek(): dev->buffer is null");
+        return -ENOMEM;
+    }
+
+    loff_t newpos;
+
+    switch (whence) {
+        case SEEK_SET:
+            newpos = off;
+            break;
+        case SEEK_CUR:
+            newpos = file->f_pos + off;
+            break;
+        case SEEK_END:
+            newpos = (loff_t)buffer->out_offs + off;   // dev->size = current length
+            break;
+        default:
+            return -EINVAL;
+    }
+
+    file->f_pos = newpos;
+    return newpos;
+}
+
+static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
+{
+    struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
+    if(dev == NULL){
+        PDEBUG("lseek(): dev is NULL");
+        return -ENOMEM;
+    }
+    struct aesd_circular_buffer *buffer = dev->buffer;
+    buffer = aesd_device.buffer;
+    if(buffer == NULL){
+        PDEBUG("ioctl(): dev->buffer is null");
+        return -ENOMEM;
+    }
+    // struct mutex *lock = &(dev->lock);
+
+    if (_IOC_TYPE(cmd) != AESDCHAR_IOCSEEKTO) return -EINVAL ;
+    if (_IOC_NR(cmd)   >  AESDCHAR_IOC_MAXNR) return -EINVAL ;
+
+    if (_IOC_DIR(cmd) & _IOC_READ) {
+    if (!access_ok((void __user *)arg, _IOC_SIZE(cmd)))
+        return -EINVAL ;
+    }
+    if (_IOC_DIR(cmd) & _IOC_WRITE) {
+        if (!access_ok((void __user *)arg, _IOC_SIZE(cmd)))
+            return -EINVAL ;
+    }
+    
+    struct aesd_seekto *seekto = (struct aesd_seekto *)arg;
+
+    switch (cmd) {
+        case AESDCHAR_IOCSEEKTO:
+            
+            filp->f_pos = aesd_circular_buffer_get_bytes_to_ofs(buffer, seekto->write_cmd, seekto->write_cmd_offset);
+            break;
+
+        default:
+            return -EINVAL ;
+    }
+
+    return 0;
+}
+
+static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, unsigned int *y){
+
+    const size_t prefix_len = sizeof(SPECIAL_STR_PREFIX) - 1;
+    if(len < prefix_len + 3){
+        return -1;
+    }
+
+    if(!strncmp(buf, SPECIAL_STR_PREFIX, prefix_len)){
+        return -1;
+    }
+    
+    char *p = buf + prefix_len;
+    char *comma = strchr(p, ',');
+    char *endptr;
+
+    if (!comma) { 
+        return -1;
+    }
+
+    /* enforce NO spaces: fail if any space appears */
+    if (strchr(p, ' ') || strchr(p, '\t')) {
+        return -1;
+    }
+
+    /* split X and Y */
+    *comma = '\0';
+    /* parse X */
+    if (kstrtouint(p, 10, x)) { 
+        return -1;
+    }
+    /* parse Y (ensure no trailing junk after Y) */
+    if (kstrtouint(comma + 1, 10, y)) { 
+        return -1;
+     }
+    /* also ensure Y is the last token in the inspected chunk */
+    endptr = comma + 1;
+    while (*endptr && *endptr >= '0' && *endptr <= '9') endptr++;
+    if (*endptr != '\0') { 
+        return -1; 
+    }
+
+    return 0;
+
+}
+
 struct file_operations aesd_fops = {
     .owner =    THIS_MODULE,
     .read =     aesd_read,
     .write =    aesd_write,
     .open =     aesd_open,
     .release =  aesd_release,
+    .llseek = aesd_llseek,
+    .unlocked_ioctl = aesd_unlocked_ioctl,
 };
 
 static int aesd_setup_cdev(struct aesd_dev *dev)

@@ -279,3 +279,16 @@ static void aesd_init_entry(struct aesd_buffer_entry *entry){
 	}
 	entry->size = 0;
 }
+
+unsigned int aesd_circular_buffer_get_bytes_to_ofs(struct aesd_circular_buffer *buffer, uint32_t elem_ind, uint32_t ofs_in_elem){
+
+	int i;
+	unsigned int byte_len = 0;
+
+	for(i = 0; i< elem_ind; i++){
+		byte_len += buffer->entry[i].size;
+	}
+	byte_len += ofs_in_elem;
+
+	return byte_len;
+}
