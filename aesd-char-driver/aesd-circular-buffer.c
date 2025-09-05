@@ -186,8 +186,6 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	int copy_start;
 	size_t copy_len;
 
-	PDEBUG("aesd_circular_buffer_raed(): 0");
-
 	if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
 		PDEBUG("aesd_circular_buffer_raed(): 1 no data to read");
 		return 0;
@@ -205,7 +203,6 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		next_entry = buffer->entry[buffer->out_offs]; 
 		next_size = next_entry.size;
 
-		PDEBUG("aesd_circular_buffer_raed(): 1");
 		if(next_entry.buffptr == NULL){
 			PDEBUG("aesd_circular_buffer_raed(): 2.1");
 			break;
@@ -218,9 +215,9 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 			copy_len = next_size;
 		}
 
+		PDEBUG("aesd_circular_buffer_raed() read_len = %d, next_size = %d, copy_len = %d", read_len, next_size, copy_len);
 		memcpy(result_buf + copy_start + read_len, next_entry.buffptr, copy_len);
 
-		PDEBUG("aesd_circular_buffer_raed(): 2.5");
 		read_len += copy_len;
 
 		buffer->out_offs += 1;
@@ -246,8 +243,6 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 			PDEBUG("aesd_circular_buffer_raed(): read all data, break");
 			break;
 		}
-
-		PDEBUG("aesd_circular_buffer_raed(): 3");
 	}
 
 	// *f_pos = buffer->out_offs;
