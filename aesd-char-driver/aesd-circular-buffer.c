@@ -179,11 +179,10 @@ int aesd_circular_buffer_init(struct aesd_circular_buffer *buffer)
 size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *result_buf, size_t len, loff_t *f_pos){
 
 	size_t read_len = 0;
-	size_t next_size;
 	size_t start_byte_ofs;
 	struct aesd_buffer_entry next_entry;
 	int startp;
-	int copy_start, ofs_in_entry, is_first_entry;
+	int copy_start, ofs_in_entry, is_first_entry, remain_in_entry;
 	size_t copy_len;
 
 	if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
@@ -204,33 +203,37 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		next_entry = buffer->entry[buffer->out_offs]; 
 		if(is_first_entry){
 			ofs_in_entry = start_byte_ofs;
-			is_first_entry = 0;
 		}
 		else{
 			ofs_in_entry = 0;
 		}
-		next_size = next_entry.size - ofs_in_entry;
+		remain_in_entry = next_entry.size - ofs_in_entry;
 
 		if(next_entry.buffptr == NULL){
 			PDEBUG("aesd_circular_buffer_raed(): 2.1");
 			break;
 		}
 		
-		if(read_len + next_size >= len){
+		if(read_len + remain_in_entry >= len){
 			copy_len = len - read_len;
 		}
 		else{
-			copy_len = next_size;
+			copy_len = remain_in_entry;
 		}
 
-		PDEBUG("aesd_circular_buffer_raed() read_len = %d, next_size = %d, copy_len = %d", read_len, next_size, copy_len);
+		PDEBUG("aesd_circular_buffer_raed() read_len = %d, remain_in_entry = %d, copy_len = %d", read_len, remain_in_entry, copy_len);
 		memcpy(result_buf + copy_start + read_len, next_entry.buffptr + ofs_in_entry, copy_len);
 
 		read_len += copy_len;
 
-		buffer->out_offs += 1;
-		if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
-			buffer->out_offs = 0;        
+		if(copy_len >= remain_in_entry){
+
+			buffer->out_offs += 1;
+			if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
+				buffer->out_offs = 0;        
+			}
+
+			is_first_entry = 0;
 		}
 		PDEBUG("aesd_circular_buffer_raed() adding buffer: %s", next_entry.buffptr);
 		PDEBUG("aesd_circular_buffer_raed() res_buffer: %s", result_buf);
