@@ -104,11 +104,12 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
     retval = aesd_circular_buffer_raed(buffer, kbuf, count, f_pos);
     //mutex_unlock(lock);
 
-    PDEBUG("read(): start copy to user buffer");
     if(copy_to_user(buf, kbuf, retval)){
         retval = -ENOMEM;
     }
     kfree(kbuf);
+
+    PDEBUG("read(): completed. ret = %d, ppos = %d", retval, *f_pos);
 
     return retval;
 }

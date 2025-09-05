@@ -250,7 +250,8 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		PDEBUG("aesd_circular_buffer_raed(): 3");
 	}
 
-	*f_pos = buffer->out_offs;
+	// *f_pos = buffer->out_offs;
+	*f_pos += read_len;
 
 	PDEBUG("aesd_circular_buffer_raed(): read %dbytes", read_len);
 	PDEBUG("aesd_circular_buffer_raed() in_ofs: %d", buffer->in_offs);
