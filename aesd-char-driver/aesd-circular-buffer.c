@@ -200,7 +200,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	}
 
 	is_first_entry = 1;
-	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
+	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d start_byte_ofs: %d", buffer->out_offs, start_byte_ofs);
 	copy_start = strlen(result_buf);
 
 	while(1){
