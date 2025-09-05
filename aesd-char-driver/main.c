@@ -196,6 +196,8 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
 }
 static loff_t aesd_llseek(struct file *file, loff_t off, int whence)
 {
+    PDEBUG("aesd_llseek(): filp = %d, off = %d, whence = %d", file->f_pos, off, whence);
+
     struct aesd_dev *dev = (struct aesd_dev *)file->private_data;
     if(dev == NULL){
         PDEBUG("lseek(): dev is NULL");
@@ -231,6 +233,7 @@ static loff_t aesd_llseek(struct file *file, loff_t off, int whence)
 
 static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
+    PDEBUG("aesd_unlocked_ioctl(): filp = %d", filp->f_pos);
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     if(dev == NULL){
         PDEBUG("lseek(): dev is NULL");
@@ -257,6 +260,7 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
     }
     
     struct aesd_seekto *seekto = (struct aesd_seekto *)arg;
+    PDEBUG("aesd_unlocked_ioctl(): cmd = %d, ofs = %d", seekto->write_cmd, seekto->write_cmd_offset);
 
     switch (cmd) {
         case AESDCHAR_IOCSEEKTO:
