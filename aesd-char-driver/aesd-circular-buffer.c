@@ -184,6 +184,11 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	int startp;
 	int copy_start, ofs_in_entry, is_first_entry, remain_in_entry;
 	size_t copy_len;
+	
+	if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
+		PDEBUG("aesd_circular_buffer_raed(): 1 no data to read");
+		return 0;
+	}
 
 	startp = aesd_circular_buffer_find_entry_offset_and_index_for_fpos(buffer, *f_pos, &start_byte_ofs);
 	if(startp < 0){
@@ -191,10 +196,6 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	}
 	
 	buffer->out_offs = startp;
-	if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
-		PDEBUG("aesd_circular_buffer_raed(): 1 no data to read");
-		return 0;
-	}
 
 	is_first_entry = 1;
 	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
