@@ -184,8 +184,9 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
     if(aesd_check_special_str(kbuf, count, &seekto.write_cmd, &seekto.write_cmd_offset) == 0){
         aesd_unlocked_ioctl(filp, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
     }
-
-    aesd_circular_buffer_add_entry(buffer, &entry);
+    else{
+        aesd_circular_buffer_add_entry(buffer, &entry);
+    }
     kfree(kbuf);
 
     PDEBUG("write(): buffer after adr = %p inofs = %d, outofs = %d, full = %d", buffer, buffer->in_offs, buffer->out_offs, buffer->full);
