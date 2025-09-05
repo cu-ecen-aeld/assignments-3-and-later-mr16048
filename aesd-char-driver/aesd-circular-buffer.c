@@ -234,6 +234,16 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 			}
 
 			is_first_entry = 0;
+		
+			if(buffer->out_offs == buffer->in_offs){
+				// PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
+				PDEBUG("aesd_circular_buffer_raed(): read all data, break");
+				break;
+			}
+
+			if(buffer->full){
+				buffer->full = false;
+			}
 		}
 		PDEBUG("aesd_circular_buffer_raed() adding buffer: %s", next_entry.buffptr);
 		PDEBUG("aesd_circular_buffer_raed() res_buffer: %s", result_buf);
@@ -242,18 +252,12 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		// 	PDEBUG("aesd_circular_buffer_raed(): read all data, break");
 		// 	break;
 		// }
-		if(buffer->full){
-			buffer->full = false;
-		}
+
 		if(read_len >= len){
 			PDEBUG("aesd_circular_buffer_raed(): read specified length of data, break");
 			break;	
 		}
-		if(buffer->out_offs == buffer->in_offs){
-			// PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
-			PDEBUG("aesd_circular_buffer_raed(): read all data, break");
-			break;
-		}
+		
 	}
 
 	// *f_pos = buffer->out_offs;
