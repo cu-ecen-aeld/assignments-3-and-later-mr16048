@@ -189,13 +189,12 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	if(startp < 0){
 		return 0;
 	}
-		
+	
+	buffer->out_offs = startp;
 	if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
 		PDEBUG("aesd_circular_buffer_raed(): 1 no data to read");
 		return 0;
 	}
-	
-	buffer->out_offs = startp;
 
 	is_first_entry = 1;
 	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
