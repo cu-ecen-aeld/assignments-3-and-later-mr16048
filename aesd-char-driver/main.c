@@ -100,7 +100,6 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
 
     //mutex_lock(lock);
     PDEBUG("read(): start read from cir buffer");
-    PDEBUG("read(): initial kbuf: %s", kbuf);
     retval = aesd_circular_buffer_raed(buffer, kbuf, count, f_pos);
     //mutex_unlock(lock);
 
@@ -167,8 +166,6 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         return -ENOMEM;
      }
      entry.size = count;
-
-     PDEBUG("write(): start mutex lock");
      //mutex_lock(lock);
          
      /* free if already allocated */
