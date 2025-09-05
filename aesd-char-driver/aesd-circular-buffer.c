@@ -183,7 +183,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	size_t start_byte_ofs;
 	struct aesd_buffer_entry next_entry;
 	int startp;
-	int copy_start;
+	int copy_start, ofs_in_entry, is_first_entry;
 	size_t copy_len;
 
 	if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
@@ -196,12 +196,20 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		return 0;
 	}
 	buffer->out_offs = startp;
+	is_first_entry = 1;
 	PDEBUG("aesd_circular_buffer_raed() out_ofs: %d", buffer->out_offs);
 	copy_start = strlen(result_buf);
 
 	while(1){
 		next_entry = buffer->entry[buffer->out_offs]; 
-		next_size = next_entry.size;
+		if(is_first_entry){
+			ofs_in_entry = start_byte_ofs;
+			is_first_entry = 0;
+		}
+		else{
+			ofs_in_entry = 0;
+		}
+		next_size = next_entry.size - ofs_in_entry;
 
 		if(next_entry.buffptr == NULL){
 			PDEBUG("aesd_circular_buffer_raed(): 2.1");
@@ -216,7 +224,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		}
 
 		PDEBUG("aesd_circular_buffer_raed() read_len = %d, next_size = %d, copy_len = %d", read_len, next_size, copy_len);
-		memcpy(result_buf + copy_start + read_len, next_entry.buffptr, copy_len);
+		memcpy(result_buf + copy_start + read_len, next_entry.buffptr + ofs_in_entry, copy_len);
 
 		read_len += copy_len;
 
