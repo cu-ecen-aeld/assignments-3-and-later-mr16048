@@ -88,7 +88,7 @@ ssize_t aesd_read(struct file *filp, char __user *buf, size_t count,
         return -ENOMEM;
     }
 
-    PDEBUG("read(): buffer adr = %p inofs = %d, outofs = %d, full = %d", buffer, buffer->in_offs, buffer->out_offs, buffer->full);
+    PDEBUG("read(): buffer adr = %p start_abs = %d, w_abs = %d, full = %d", buffer, buffer->start_abs, buffer->w_abs, buffer->full);
 
     char *kbuf = kmalloc(count, GFP_KERNEL);
     if(kbuf == NULL){
@@ -135,7 +135,7 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
         PDEBUG("write(): dev->buffer is null");
         return -ENOMEM;
     }
-    PDEBUG("write(): buffer adr = %p inofs = %d, outofs = %d, full = %d", buffer, buffer->in_offs, buffer->out_offs, buffer->full);
+    PDEBUG("write(): buffer adr = %p start_abs = %d, w_abs = %d, full = %d", buffer, buffer->start_abs, buffer->w_abs, buffer->full);
 
      /* set up new entry */
      PDEBUG("write(): alloc buffer");
@@ -220,7 +220,7 @@ static loff_t aesd_llseek(struct file *file, loff_t off, int whence)
             newpos = file->f_pos + off;
             break;
         case SEEK_END:
-            newpos = (loff_t)buffer->out_offs + off;   // dev->size = current length
+            newpos = (loff_t)buffer->w_abs + off;   // dev->size = current length
             break;
         default:
             return -EINVAL;
