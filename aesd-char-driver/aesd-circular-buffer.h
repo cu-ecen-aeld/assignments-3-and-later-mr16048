@@ -52,6 +52,8 @@ struct aesd_circular_buffer
 
     uint32_t w_abs;
     uint32_t start_abs;
+    uint32_t w_char_abs;
+    uint32_t start_char_abs;
 };
 
 extern struct aesd_buffer_entry *aesd_circular_buffer_find_entry_offset_for_fpos(struct aesd_circular_buffer *buffer,
