@@ -194,6 +194,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	size_t copy_len;
 	uint8_t ri;
 
+	PDEBUG("aesd_circular_buffer_raed() f_pos=%d", *f_pos);
 	if((*f_pos < buffer->start_char_abs) || (buffer->w_char_abs < *f_pos)){
 		return -1;
 	}
