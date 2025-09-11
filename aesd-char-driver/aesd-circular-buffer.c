@@ -194,16 +194,17 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	size_t copy_len;
 	uint8_t ri;
 
-	PDEBUG("aesd_circular_buffer_raed() f_pos=%d", *f_pos);
+	PDEBUG("aesd_circular_buffer_raed() f_pos=%d start_char_abs=%d w_char_abs=%d", *f_pos, buffer->start_char_abs, buffer->w_char_abs);
 	if((*f_pos < buffer->start_char_abs) || (buffer->w_char_abs < *f_pos)){
 		return -1;
 	}
 
+	PDEBUG("aesd_circular_buffer_raed(): before find");
 	startp = aesd_circular_buffer_find_entry_offset_and_index_for_fpos(buffer, *f_pos - buffer->start_char_abs, &start_byte_ofs);
 	if(startp < 0){
 		return 0;
 	}
-	
+	PDEBUG("aesd_circular_buffer_raed(): after find");
 	buffer->out_offs = startp;
 	buffer->start_abs = startp;
 	// if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
