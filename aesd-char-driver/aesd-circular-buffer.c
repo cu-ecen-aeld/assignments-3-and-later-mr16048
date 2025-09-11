@@ -168,8 +168,7 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 		}
 	}
 
-	PDEBUG("aesd_circular_buffer_add_entry() in_ofs: %d", buffer->in_offs);
-	PDEBUG("aesd_circular_buffer_add_entry() out_ofs: %d", buffer->out_offs);
+	PDEBUG("aesd_circular_buffer_add_entry() w_char_abs: %d", buffer->w_char_abs);
 }
 
 /**
