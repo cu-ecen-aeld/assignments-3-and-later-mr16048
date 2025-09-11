@@ -154,7 +154,6 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 		memcpy(target->buffptr, tmp_entry.buffptr, tmp_entry.size);
 		target->size = tmp_entry.size;
 		PDEBUG("aesd_circular_buffer_add_entry after add: %s", target->buffptr);
-		aesd_init_entry(&tmp_entry);
 		
 		buffer->in_offs += 1;	
 		buffer->w_abs += 1;
@@ -166,6 +165,7 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 		if(buffer->in_offs == buffer->out_offs){
 			buffer->full = true;
 		}
+		aesd_init_entry(&tmp_entry);
 	}
 
 	PDEBUG("aesd_circular_buffer_add_entry() w_char_abs: %d", buffer->w_char_abs);
