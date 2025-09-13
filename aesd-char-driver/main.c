@@ -285,7 +285,7 @@ static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, 
         return -1;
     }
 
-    if(!strncmp(buf, SPECIAL_STR_PREFIX, prefix_len)){
+    if(strncmp(buf, SPECIAL_STR_PREFIX, prefix_len) != 0){
         PDEBUG("check_special_str() : 2");
         return -1;
     }
