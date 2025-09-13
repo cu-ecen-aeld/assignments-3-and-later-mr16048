@@ -216,13 +216,13 @@ static loff_t aesd_llseek(struct file *file, loff_t off, int whence)
 
     switch (whence) {
         case SEEK_SET:
-            newpos = off;
+            newpos = (loff_t)buffer->start_char_abs + off;
             break;
         case SEEK_CUR:
             newpos = file->f_pos + off;
             break;
         case SEEK_END:
-            newpos = (loff_t)buffer->w_abs + off;   // dev->size = current length
+            newpos = (loff_t)buffer->w_char_abs + off;   // dev->size = current length
             break;
         default:
             return -EINVAL;
