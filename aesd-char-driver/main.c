@@ -278,12 +278,15 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
 
 static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, unsigned int *y){
 
+    PDEBUG("check_special_str() buf=%s, len=%d", buf, len);
     const size_t prefix_len = sizeof(SPECIAL_STR_PREFIX) - 1;
     if(len < prefix_len + 3){
+        PDEBUG("check_special_str() : 1");
         return -1;
     }
 
     if(!strncmp(buf, SPECIAL_STR_PREFIX, prefix_len)){
+        PDEBUG("check_special_str() : 2");
         return -1;
     }
     
@@ -292,11 +295,13 @@ static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, 
     char *endptr;
 
     if (!comma) { 
+        PDEBUG("check_special_str() : 3");
         return -1;
     }
 
     /* enforce NO spaces: fail if any space appears */
     if (strchr(p, ' ') || strchr(p, '\t')) {
+        PDEBUG("check_special_str() : 4");
         return -1;
     }
 
@@ -304,18 +309,22 @@ static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, 
     *comma = '\0';
     /* parse X */
     if (kstrtouint(p, 10, x)) { 
+        PDEBUG("check_special_str() : 5");
         return -1;
     }
     /* parse Y (ensure no trailing junk after Y) */
-    if (kstrtouint(comma + 1, 10, y)) { 
+    if (kstrtouint(comma + 1, 10, y)) {
+        PDEBUG("check_special_str() : 6"); 
         return -1;
      }
     /* also ensure Y is the last token in the inspected chunk */
     endptr = comma + 1;
     while (*endptr && *endptr >= '0' && *endptr <= '9') endptr++;
     if (*endptr != '\0') { 
+        PDEBUG("check_special_str() : 7");
         return -1; 
     }
+    PDEBUG("check_special_str() : 8");
 
     return 0;
 
