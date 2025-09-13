@@ -314,7 +314,7 @@ static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, 
     }
     /* parse Y (ensure no trailing junk after Y) */
     if (kstrtouint(comma + 1, 10, y)) {
-        PDEBUG("check_special_str() : 6"); 
+        PDEBUG("check_special_str() : 6, comma+1=%d", *(comma + 1)); 
         return -1;
      }
     /* also ensure Y is the last token in the inspected chunk */
