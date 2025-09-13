@@ -321,7 +321,7 @@ static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, 
     endptr = comma + 1;
     while (*endptr && *endptr >= '0' && *endptr <= '9') endptr++;
     if (*endptr != '\0') { 
-        PDEBUG("check_special_str() : 7");
+        PDEBUG("check_special_str() : 7 endptr=%s", endptr);
         return -1; 
     }
     PDEBUG("check_special_str() : 8");
