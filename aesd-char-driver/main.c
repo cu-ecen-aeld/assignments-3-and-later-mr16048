@@ -279,18 +279,32 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
 static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, unsigned int *y){
 
     PDEBUG("check_special_str() buf=%s, len=%d", buf, len);
+
+    char *pbuf = NULL;
+    size_t n = len;
+
+    // Null terminate string to use it for C str function
+    // Copy it to temp buffer not to modify the original
+    pbuf = kmalloc(n + 1, GFP_KERNEL);
+    if (!pbuf) { return -1; }
+    memcpy(pbuf, buf, n);
+    pbuf[n] = '\0';
+
+    while (n && (pbuf[n-1] == '\n' || pbuf[n-1] == '\r'))
+        pbuf[--n] = '\0';
+
     const size_t prefix_len = sizeof(SPECIAL_STR_PREFIX) - 1;
     if(len < prefix_len + 3){
         PDEBUG("check_special_str() : 1");
         return -1;
     }
 
-    if(strncmp(buf, SPECIAL_STR_PREFIX, prefix_len) != 0){
+    if(strncmp(pbuf, SPECIAL_STR_PREFIX, prefix_len) != 0){
         PDEBUG("check_special_str() : 2");
         return -1;
     }
     
-    char *p = buf + prefix_len;
+    char *p = pbuf + prefix_len;
     char *comma = strchr(p, ',');
     char *endptr;
 
