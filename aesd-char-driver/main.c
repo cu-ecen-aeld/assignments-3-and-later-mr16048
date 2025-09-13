@@ -318,13 +318,15 @@ static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, 
         return -1;
      }
     /* also ensure Y is the last token in the inspected chunk */
+    #if 0
     endptr = comma + 1;
     while (*endptr && *endptr >= '0' && *endptr <= '9') endptr++;
     if (*endptr != '\0') { 
         PDEBUG("check_special_str() : 7 endptr=%s", endptr);
         return -1; 
     }
-    PDEBUG("check_special_str() : 8");
+    #endif
+    PDEBUG("check_special_str() : 8 x=%d, y=%d", x, y);
 
     return 0;
 
