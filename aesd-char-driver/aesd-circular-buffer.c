@@ -158,6 +158,11 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 		PDEBUG("aesd_circular_buffer_add_entry after add: %s", target->buffptr);
 		
 		buffer->in_offs += 1;	
+		
+		if(buffer->w_abs - buffer->start_abs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
+			buffer->start_abs += 1;
+			buffer->start_char_abs += buffer->entry[buffer->start_abs % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED].size;
+		}
 		buffer->w_abs += 1;
 		buffer->w_char_abs += tmp_entry.size;
 		// buffer->out_offs += 1;
@@ -167,10 +172,7 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 		if(buffer->in_offs == buffer->out_offs){
 			buffer->full = true;
 		}
-		if(buffer->w_abs - buffer->start_abs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
-			buffer->start_abs += 1;
-			buffer->start_char_abs += buffer->entry[buffer->start_abs % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED].size;
-		}
+		
 		aesd_init_entry(&tmp_entry);
 	}
 
