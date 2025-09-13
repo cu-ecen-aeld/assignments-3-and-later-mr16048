@@ -27,7 +27,7 @@
 int aesd_major =   0; // use dynamic major
 int aesd_minor =   0;
 
-#define SPECIAL_STR_PREFIX "AESDCHAR_IOCSEEKTO"
+#define SPECIAL_STR_PREFIX "AESDCHAR_IOCSEEKTO:"
 
 MODULE_AUTHOR("Your Name Here"); /** TODO: fill in your name **/
 MODULE_LICENSE("Dual BSD/GPL");
