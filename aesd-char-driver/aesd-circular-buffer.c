@@ -81,7 +81,7 @@ int aesd_circular_buffer_find_entry_offset_and_index_for_fpos(struct aesd_circul
 	size_t next_len;
 
 	total_len = 0;
-	PDEBUG("aesd_circular_buffer_find_index(): out_ofs = %d, in_ofs = %d, char_offset = %d", buffer->out_offs, buffer->in_offs, char_offset);
+	PDEBUG("aesd_circular_buffer_find_index(): start_abs = %d, w_abs = %d, char_offset = %d", buffer->start_abs, buffer->w_abs, char_offset);
 	
 	// i = buffer->in_offs;
 	i = buffer->start_abs;
@@ -169,6 +169,7 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 		}
 		if(buffer->w_abs - buffer->start_abs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 			buffer->start_abs += 1;
+			buffer->start_char_abs += buffer->entry[buffer->start_abs % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED].size;
 		}
 		aesd_init_entry(&tmp_entry);
 	}
@@ -210,9 +211,8 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 	}
 	PDEBUG("aesd_circular_buffer_raed(): after find");
 	buffer->out_offs = startp;
-	buffer->start_abs = startp;
 	// if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
-	if(buffer->start_abs == buffer->w_abs){
+	if(startp == buffer->w_abs){
 		PDEBUG("aesd_circular_buffer_raed(): 1 no data to read");
 		return 0;
 	}
@@ -223,7 +223,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 
 	while(1){
 		
-		ri = buffer->start_abs  % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
+		ri = startp  % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
 		next_entry = buffer->entry[ri]; 
 		if(is_first_entry){
 			ofs_in_entry = start_byte_ofs;
@@ -253,8 +253,8 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		if(copy_len >= remain_in_entry){
 
 			buffer->out_offs += 1;
-			buffer->start_abs += 1;
-			buffer->start_char_abs += copy_len;
+			startp += 1;
+			// buffer->start_char_abs += copy_len;
 			if(buffer->out_offs >= AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED){
 				buffer->out_offs = 0;        
 			}
@@ -262,7 +262,7 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 			is_first_entry = 0;
 		
 			// if(buffer->out_offs == buffer->in_offs){
-			if(buffer->start_abs == buffer->w_abs){
+			if(startp == buffer->w_abs){
 				// PDEBUG("aesd_circular_buffer_raed(): break outp: %d, inp: %d", buffer->out_offs, buffer->in_offs);
 				PDEBUG("aesd_circular_buffer_raed(): read all data, break");
 				break;
