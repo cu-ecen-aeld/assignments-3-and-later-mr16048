@@ -248,12 +248,12 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
     }
     // struct mutex *lock = &(dev->lock);
 
-    if (_IOC_TYPE(cmd) != AESDCHAR_IOCSEEKTO) {
-        PDEBUG("ioctl(): incorrect cmd");
+    if (_IOC_TYPE(cmd) != AESD_IOC_MAGIC) {
+        PDEBUG("ioctl(): incorrect cmd type");
         return -EINVAL ;
     }
     if (_IOC_NR(cmd)   >  AESDCHAR_IOC_MAXNR) {
-        PDEBUG("ioctl(): incorrect cmd 2");
+        PDEBUG("ioctl(): incorrect cmd num");
         return -EINVAL ;
     }
 
