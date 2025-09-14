@@ -333,9 +333,11 @@ unsigned int aesd_circular_buffer_get_bytes_to_ofs(struct aesd_circular_buffer *
 	unsigned int byte_len = 0;
 
 	for(i = 0; i< elem_ind; i++){
+		PDEBUG("aesd_circular_buffer_get_bytes_to_ofs() size(i): %d", buffer->entry[i].size);
 		byte_len += buffer->entry[i].size;
 	}
 	byte_len += ofs_in_elem;
+	PDEBUG("aesd_circular_buffer_get_bytes_to_ofs() final size: %d", byte_len);
 
 	return byte_len;
 }

@@ -277,7 +277,8 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
     switch (cmd) {
         case AESDCHAR_IOCSEEKTO:
             
-            filp->f_pos = aesd_circular_buffer_get_bytes_to_ofs(buffer, seekto->write_cmd, seekto->write_cmd_offset);
+            filp->f_pos = aesd_circular_buffer_get_bytes_to_ofs(buffer, seekto->write_cmd, seekto->write_cmd_offset) + buffer->start_char_abs;
+            PDEBUG("aesd_unlocked_ioctl(): cmd = %d, ofs = %d", filp->f_pos, buffer->start_char_abs);
             break;
 
         default:
