@@ -256,7 +256,7 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
         PDEBUG("ioctl(): incorrect cmd num");
         return -EINVAL ;
     }
-
+#if 0
     if (_IOC_DIR(cmd) & _IOC_READ) {
         if (!access_ok((void __user *)arg, _IOC_SIZE(cmd))){
             PDEBUG("ioctl(): cannot access");
@@ -269,6 +269,7 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
             }
         }
     }
+#endif
     
     struct aesd_seekto *seekto = (struct aesd_seekto *)arg;
     PDEBUG("aesd_unlocked_ioctl(): cmd = %d, ofs = %d", seekto->write_cmd, seekto->write_cmd_offset);
