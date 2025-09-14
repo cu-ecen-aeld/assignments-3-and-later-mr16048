@@ -234,10 +234,10 @@ static loff_t aesd_llseek(struct file *file, loff_t off, int whence)
 
 static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
-    PDEBUG("aesd_unlocked_ioctl(): filp = %d", filp->f_pos);
+    PDEBUG("aesd_unlocked_ioctl(): filp = %d cmd = %d", filp->f_pos, cmd);
     struct aesd_dev *dev = (struct aesd_dev *)filp->private_data;
     if(dev == NULL){
-        PDEBUG("lseek(): dev is NULL");
+        PDEBUG("ioctl(): dev is NULL");
         return -ENOMEM;
     }
     struct aesd_circular_buffer *buffer = dev->buffer;
@@ -248,16 +248,26 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
     }
     // struct mutex *lock = &(dev->lock);
 
-    if (_IOC_TYPE(cmd) != AESDCHAR_IOCSEEKTO) return -EINVAL ;
-    if (_IOC_NR(cmd)   >  AESDCHAR_IOC_MAXNR) return -EINVAL ;
-
-    if (_IOC_DIR(cmd) & _IOC_READ) {
-    if (!access_ok((void __user *)arg, _IOC_SIZE(cmd)))
+    if (_IOC_TYPE(cmd) != AESDCHAR_IOCSEEKTO) {
+        PDEBUG("ioctl(): incorrect cmd");
         return -EINVAL ;
     }
-    if (_IOC_DIR(cmd) & _IOC_WRITE) {
-        if (!access_ok((void __user *)arg, _IOC_SIZE(cmd)))
+    if (_IOC_NR(cmd)   >  AESDCHAR_IOC_MAXNR) {
+        PDEBUG("ioctl(): incorrect cmd 2");
+        return -EINVAL ;
+    }
+
+    if (_IOC_DIR(cmd) & _IOC_READ) {
+        if (!access_ok((void __user *)arg, _IOC_SIZE(cmd))){
+            PDEBUG("ioctl(): cannot access");
             return -EINVAL ;
+        }
+        if (_IOC_DIR(cmd) & _IOC_WRITE) {
+            if (!access_ok((void __user *)arg, _IOC_SIZE(cmd))){
+                PDEBUG("ioctl(): cannot access 2");
+                return -EINVAL ;
+            }
+        }
     }
     
     struct aesd_seekto *seekto = (struct aesd_seekto *)arg;
@@ -340,7 +350,7 @@ static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, 
         return -1; 
     }
     #endif
-    PDEBUG("check_special_str() : 8 x=%d, y=%d", x, y);
+    PDEBUG("check_special_str() : 8 x=%d, y=%d", *x, *y);
 
     return 0;
 
