@@ -27,8 +27,6 @@
 int aesd_major =   0; // use dynamic major
 int aesd_minor =   0;
 
-#define SPECIAL_STR_PREFIX "AESDCHAR_IOCSEEKTO:"
-
 MODULE_AUTHOR("Your Name Here"); /** TODO: fill in your name **/
 MODULE_LICENSE("Dual BSD/GPL");
 
@@ -42,7 +40,6 @@ int aesd_init_module(void);
 void aesd_cleanup_module(void);
 static loff_t aesd_llseek(struct file *, loff_t, int);
 static long aesd_unlocked_ioctl(struct file *, unsigned int, unsigned long);
-static int aesd_check_special_str(char *, unsigned int, unsigned int *, unsigned int *);
 
 int aesd_open(struct inode *inode, struct file *filp)
 {
@@ -178,14 +175,15 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
 
      /* add to circular buffer */
      PDEBUG("write(): start write to circular buffer");
-
+#if 0
     struct aesd_seekto seekto;
     if(aesd_check_special_str(kbuf, count, &seekto.write_cmd, &seekto.write_cmd_offset) == 0){
         aesd_unlocked_ioctl(filp, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
     }
     else{
+#endif
         aesd_circular_buffer_add_entry(buffer, &entry);
-    }
+//    }
     kfree(kbuf);
 
     PDEBUG("write(): buffer after adr = %p inofs = %d, outofs = %d, full = %d", buffer, buffer->in_offs, buffer->out_offs, buffer->full);
@@ -229,6 +227,7 @@ static loff_t aesd_llseek(struct file *file, loff_t off, int whence)
     }
 
     file->f_pos = newpos;
+
     return newpos;
 }
 
@@ -286,76 +285,6 @@ static long aesd_unlocked_ioctl(struct file *filp, unsigned int cmd, unsigned lo
     }
 
     return 0;
-}
-
-static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, unsigned int *y){
-
-    PDEBUG("check_special_str() buf=%s, len=%d", buf, len);
-
-    char *pbuf = NULL;
-    size_t n = len;
-
-    // Null terminate string to use it for C str function
-    // Copy it to temp buffer not to modify the original
-    pbuf = kmalloc(n + 1, GFP_KERNEL);
-    if (!pbuf) { return -1; }
-    memcpy(pbuf, buf, n);
-    pbuf[n] = '\0';
-
-    while (n && (pbuf[n-1] == '\n' || pbuf[n-1] == '\r'))
-        pbuf[--n] = '\0';
-
-    const size_t prefix_len = sizeof(SPECIAL_STR_PREFIX) - 1;
-    if(len < prefix_len + 3){
-        PDEBUG("check_special_str() : 1");
-        return -1;
-    }
-
-    if(strncmp(pbuf, SPECIAL_STR_PREFIX, prefix_len) != 0){
-        PDEBUG("check_special_str() : 2");
-        return -1;
-    }
-    
-    char *p = pbuf + prefix_len;
-    char *comma = strchr(p, ',');
-    char *endptr;
-
-    if (!comma) { 
-        PDEBUG("check_special_str() : 3");
-        return -1;
-    }
-
-    /* enforce NO spaces: fail if any space appears */
-    if (strchr(p, ' ') || strchr(p, '\t')) {
-        PDEBUG("check_special_str() : 4");
-        return -1;
-    }
-
-    /* split X and Y */
-    *comma = '\0';
-    /* parse X */
-    if (kstrtouint(p, 10, x)) { 
-        PDEBUG("check_special_str() : 5");
-        return -1;
-    }
-    /* parse Y (ensure no trailing junk after Y) */
-    if (kstrtouint(comma + 1, 10, y)) {
-        PDEBUG("check_special_str() : 6, comma+1=%s", comma + 1); 
-        return -1;
-     }
-    /* also ensure Y is the last token in the inspected chunk */
-    #if 0
-    endptr = comma + 1;
-    while (*endptr && *endptr >= '0' && *endptr <= '9') endptr++;
-    if (*endptr != '\0') { 
-        PDEBUG("check_special_str() : 7 endptr=%s", endptr);
-        return -1; 
-    }
-    #endif
-    PDEBUG("check_special_str() : 8 x=%d, y=%d", *x, *y);
-
-    return 0;
-
 }
 
 struct file_operations aesd_fops = {
