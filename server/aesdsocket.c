@@ -11,17 +11,22 @@
 #include <signal.h>
 #include <time.h>
 #include <pthread.h>
+#include "../aesd-char-driver/aesd_ioctl.h"
 #define BUF_SIZE 1024
 #define OUT_FILE "/dev/aesdchar"
+#define SPECIAL_STR_PREFIX "AESDCHAR_IOCSEEKTO:"
 
 static int write_all(int, void *, size_t);
 void sig_handler(int);
 // static void print_cur_time(void);
 static void* proc_new_connection(void *);
 static int create_thread_and_run(int);
-static int write_to_out_file(void *, size_t);
+static int write_to_out_file(int *, void *, size_t);
 static void write_time_to_file(union sigval);
 static int write_prdc_to_file(void);
+static inline void trim_crlf(char *);
+static int parse_seek_command(char *, unsigned *, unsigned *);
+// static int aesd_check_special_str(char *, unsigned int, unsigned int *, unsigned int *);
 
 volatile sig_atomic_t quit_sig = 0;
 pthread_mutex_t mutex;
@@ -207,12 +212,13 @@ static void* proc_new_connection(void *arg){
   }
 
   // write to file
-  *err = write_to_out_file(buffer, read_byte);
+  out_fd = open(OUT_FILE, O_RDONLY, 0644);
+
+  *err = write_to_out_file(&out_fd, buffer, read_byte);
   if(*err != 0){
     return err;
   }
 
-  out_fd = open(OUT_FILE, O_RDONLY, 0644);
   while(1){
     // read from file
     read_from_file = read(out_fd, file_buffer, BUF_SIZE);
@@ -269,20 +275,29 @@ TH_END:
   return err;
 }
 
-static int write_to_out_file(void *buffer, size_t write_size){
+static int write_to_out_file(int *out_fd, void *buffer, size_t write_size){
 
-  int out_fd;
+  // int out_fd;
   int err = 0;
   pthread_mutex_lock(&mutex);
-  out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
-  if(out_fd == -1){
+  if(out_fd == NULL){
+    *out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
+  }
+  if(*out_fd == -1){
     err = -1;
     return err;
   }
-  err = write_all(out_fd, buffer, write_size);
-  close(out_fd);
+
+  struct aesd_seekto seekto;
+  if(parse_seek_command(buffer, &seekto.write_cmd, &seekto.write_cmd_offset) != 0){
+      ioctl(*out_fd, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
+  }
+  else{
+    err = write_all(*out_fd, buffer, write_size);
+  }
+  // close(out_fd);
   pthread_mutex_unlock(&mutex);
-  
+
   return err;
 }
 
@@ -312,7 +327,7 @@ static void write_time_to_file(union sigval sv){
     return;
   }
 
-  if(write_to_out_file(time_str, strlen(time_str)) != 0){
+  if(write_to_out_file(NULL, time_str, strlen(time_str)) != 0){
     timer_error_flag = 1;
     perror("write timestamp to file");
     return;
@@ -349,3 +364,92 @@ static int write_prdc_to_file(){
 
   return 0;
 }
+
+static inline void trim_crlf(char *s)
+{
+    size_t n = strlen(s);
+    while (n && (s[n-1] == '\n' || s[n-1] == '\r')) s[--n] = '\0';
+}
+
+/* Returns 1 on success and sets *x,*y. Returns 0 if not a match. */
+static int parse_seek_command(char *line, unsigned *x, unsigned *y)
+{
+    if (!line || !x || !y) return 0;
+
+    trim_crlf(line);
+
+    int consumed = 0;
+    int matched = sscanf(line, "AESDCHAR_IOCSEEKTO:%u,%u%n", x, y, &consumed);
+
+    return (matched == 2) && (line[consumed] == '\0');
+}
+#if 0
+static int aesd_check_special_str(char *buf, unsigned int len, unsigned int *x, unsigned int *y){
+
+    // PDEBUG("check_special_str() buf=%s, len=%d", buf, len);
+
+    char *pbuf = NULL;
+    size_t n = len;
+
+    // Null terminate string to use it for C str function
+    // Copy it to temp buffer not to modify the original
+    pbuf = malloc(n + 1);
+    if (!pbuf) { return -1; }
+    memcpy(pbuf, buf, n);
+    pbuf[n] = '\0';
+
+    while (n && (pbuf[n-1] == '\n' || pbuf[n-1] == '\r'))
+        pbuf[--n] = '\0';
+
+    const size_t prefix_len = sizeof(SPECIAL_STR_PREFIX) - 1;
+    if(len < prefix_len + 3){
+        // PDEBUG("check_special_str() : 1");
+        return -1;
+    }
+
+    if(strncmp(pbuf, SPECIAL_STR_PREFIX, prefix_len) != 0){
+        // PDEBUG("check_special_str() : 2");
+        return -1;
+    }
+    
+    char *p = pbuf + prefix_len;
+    char *comma = strchr(p, ',');
+    char *endptr;
+
+    if (!comma) { 
+        // PDEBUG("check_special_str() : 3");
+        return -1;
+    }
+
+    /* enforce NO spaces: fail if any space appears */
+    if (strchr(p, ' ') || strchr(p, '\t')) {
+        // PDEBUG("check_special_str() : 4");
+        return -1;
+    }
+
+    /* split X and Y */
+    *comma = '\0';
+    /* parse X */
+    if (kstrtouint(p, 10, x)) { 
+        // PDEBUG("check_special_str() : 5");
+        return -1;
+    }
+    /* parse Y (ensure no trailing junk after Y) */
+    if (kstrtouint(comma + 1, 10, y)) {
+        // PDEBUG("check_special_str() : 6, comma+1=%s", comma + 1); 
+        return -1;
+     }
+    /* also ensure Y is the last token in the inspected chunk */
+    #if 0
+    endptr = comma + 1;
+    while (*endptr && *endptr >= '0' && *endptr <= '9') endptr++;
+    if (*endptr != '\0') { 
+        PDEBUG("check_special_str() : 7 endptr=%s", endptr);
+        return -1; 
+    }
+    #endif
+    // PDEBUG("check_special_str() : 8 x=%d, y=%d", *x, *y);
+
+    return 0;
+}
+#endif
