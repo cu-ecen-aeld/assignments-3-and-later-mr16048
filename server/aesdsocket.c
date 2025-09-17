@@ -288,14 +288,14 @@ static int write_to_out_file(int *out_fd, void *buffer, size_t write_size){
     return err;
   }
 
-  fprintf(stderr, "write_to_out_file() buffer=%s", buffer);
+  printf("write_to_out_file() buffer=%s", buffer);
   struct aesd_seekto seekto;
   if(parse_seek_command(buffer, &seekto.write_cmd, &seekto.write_cmd_offset) != 0){
-    fprintf(stderr, "write_to_out_file() ioctl");  
+    printf("write_to_out_file() ioctl");  
     ioctl(*out_fd, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
   }
   else{
-    fprintf(stderr, "write_to_out_file() ordimal write");  
+    printf("write_to_out_file() ordimal write");  
     err = write_all(*out_fd, buffer, write_size);
   }
   // close(out_fd);
@@ -383,7 +383,7 @@ static int parse_seek_command(char *line, unsigned *x, unsigned *y)
 
     int consumed = 0;
     int matched = sscanf(line, "AESDCHAR_IOCSEEKTO:%u,%u%n", x, y, &consumed);
-    fprintf(stderr, "parse_seek_command() consumed = %d, matched=%d, x = %d, y = %d", consumed, matched, x, y); 
+    printf("parse_seek_command() consumed = %d, matched=%d, x = %d, y = %d", consumed, matched, x, y); 
 
     return (matched == 2) && (line[consumed] == '\0');
 }
