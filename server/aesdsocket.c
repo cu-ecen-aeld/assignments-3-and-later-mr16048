@@ -262,11 +262,11 @@ static int create_thread_and_run(int new_fd){
   }
   *client_fd = new_fd;
 
-  // if (pthread_create(&thread, NULL, proc_new_connection, client_fd)!= 0) {
-  //     perror("Failed to create thread");
-  //     err = 1;
-  //     goto TH_END;
-  //   }
+  if (pthread_create(&thread, NULL, proc_new_connection, client_fd)!= 0) {
+      perror("Failed to create thread");
+      err = 1;
+      goto TH_END;
+    }
 
   // pthread_join(thread, &ret);
   err = *(int*)ret;
