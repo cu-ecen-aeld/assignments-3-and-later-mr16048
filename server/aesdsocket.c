@@ -170,6 +170,8 @@ static void* proc_new_connection(void *arg){
   #define TMP_FILE_NAME_SIZE 64
   char tmp_file_name[TMP_FILE_NAME_SIZE];
   
+syslog(LOG_INFO, "start thread");
+
   int new_fd = *(int*)(arg);
   free(arg);
 
