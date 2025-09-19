@@ -113,6 +113,7 @@ int main(){
     printf("Accepted connection from %s\n", host);
 
     create_thread_and_run(new_fd); 
+    syslog(LOG_INFO, "end proc for thread\n");
 
     if(timer_error_flag != 0){
       goto CLOSE;
@@ -121,7 +122,7 @@ int main(){
 
 CLOSE:
   if(quit_sig > 0){
-    syslog(LOG_INFO, "Caught signal, exiting");
+    syslog(LOG_INFO, "Caught signal, exiting\n");
     printf("Caught signal, exiting\n");
   }
   if(err != 0){
@@ -133,7 +134,7 @@ CLOSE:
   // if(unlink(OUT_FILE)){
   //   err = 1;
   // }
-  syslog(LOG_INFO, "closed sock");
+  syslog(LOG_INFO, "closed sock\n");
   closelog();
   if(err != 0){    
     return -1;
@@ -170,7 +171,7 @@ static void* proc_new_connection(void *arg){
   #define TMP_FILE_NAME_SIZE 64
   char tmp_file_name[TMP_FILE_NAME_SIZE];
   
-  syslog(LOG_INFO, "start thread");
+  syslog(LOG_INFO, "proc_new_connection\n");
 
   int new_fd = *(int*)(arg);
   free(arg);
@@ -251,6 +252,8 @@ static int create_thread_and_run(int new_fd){
   int err = 0;
   void *ret;
 
+  syslog(LOG_INFO, "create_thread_and_run\n");
+
   int *client_fd = malloc(sizeof(int));
   if(!client_fd){
     perror("alloc for client_fd\n");
@@ -297,7 +300,7 @@ static int write_to_out_file(int *out_fd, void *buffer, size_t write_size){
     ioctl(*out_fd, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
   }
   else{
-    syslog(LOG_INFO, "write_to_out_file() ordinal write");  
+    syslog(LOG_INFO, "write_to_out_file() ordinal write\n");  
     err = write_all(*out_fd, buffer, write_size);
   }
   // close(out_fd);
