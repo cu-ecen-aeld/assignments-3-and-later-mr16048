@@ -130,11 +130,11 @@ CLOSE:
   if(close(sock) != 0){
     perror("close sock");
   }
-  closelog();
   // if(unlink(OUT_FILE)){
   //   err = 1;
   // }
   syslog(LOG_INFO, "closed sock");
+  closelog();
   if(err != 0){    
     return -1;
   }
@@ -170,7 +170,7 @@ static void* proc_new_connection(void *arg){
   #define TMP_FILE_NAME_SIZE 64
   char tmp_file_name[TMP_FILE_NAME_SIZE];
   
-syslog(LOG_INFO, "start thread");
+  syslog(LOG_INFO, "start thread");
 
   int new_fd = *(int*)(arg);
   free(arg);
