@@ -268,7 +268,7 @@ static int create_thread_and_run(int new_fd){
       goto TH_END;
     }
 
-  // pthread_join(thread, &ret);
+  pthread_join(thread, &ret);
   err = *(int*)ret;
   if(err != 0){
     perror("Failed to join thread");
