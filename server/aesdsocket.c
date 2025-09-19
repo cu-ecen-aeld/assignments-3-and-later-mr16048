@@ -45,7 +45,7 @@ int main(){
   socklen_t addr_size;
   char host[NI_MAXHOST];
 
-  printf("start aesdsocket main\n");
+  // printf("start aesdsocket main\n");
   openlog("aesdsocket", LOG_PID | LOG_CONS, LOG_USER);
   syslog(LOG_INFO, "start aesdsocket\n");
 
@@ -110,7 +110,7 @@ int main(){
     getnameinfo((struct sockaddr *)&client_addr, addr_size,
                   host, sizeof(host), NULL, 0, NI_NUMERICHOST);
     syslog(LOG_INFO, "Accepted connection from %s\n", host);
-    printf("Accepted connection from %s\n", host);
+    // printf("Accepted connection from %s\n", host);
 
     create_thread_and_run(new_fd); 
     syslog(LOG_INFO, "end proc for thread\n");
@@ -123,7 +123,7 @@ int main(){
 CLOSE:
   if(quit_sig > 0){
     syslog(LOG_INFO, "Caught signal, exiting\n");
-    printf("Caught signal, exiting\n");
+    // printf("Caught signal, exiting\n");
   }
   if(err != 0){
     close(new_fd);
