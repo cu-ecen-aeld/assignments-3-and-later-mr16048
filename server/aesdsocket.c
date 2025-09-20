@@ -305,6 +305,7 @@ static int write_to_out_file(int *out_fd, void *buffer, size_t write_size){
   else{
     syslog(LOG_INFO, "write_to_out_file() ordinal write\n");  
     err = write_all(*out_fd, buffer, write_size);
+    syslog(LOG_INFO, "write_all result: err=%d, out_fd=%d, write_size=%d\n", err, *out_fd, write_size);
   }
   // close(out_fd);
   pthread_mutex_unlock(&mutex);
