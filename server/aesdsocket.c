@@ -223,6 +223,7 @@ static void* proc_new_connection(void *arg){
   }
 
   while(1){
+    syslog(LOG_INFO, "start read from file\n");
     // read from file
     read_from_file = read(out_fd, file_buffer, BUF_SIZE);
     if(read_from_file <= 0){
@@ -233,12 +234,14 @@ static void* proc_new_connection(void *arg){
     }
     // printf("Read %d bytes from file\n", read_from_file);
     //send to client
+    syslog(LOG_INFO, "write back to client\n");
     *err = write_all(new_fd, file_buffer, read_from_file);
     if(*err != 0){
       perror("send to client\n");
       break;
     }
   }
+  syslog(LOG_INFO, "end all process\n");
   // syslog(LOG_INFO, "Closed connection from XXX %s\n", host);
   close(out_fd);
   close(new_fd); 
@@ -388,7 +391,7 @@ static int parse_seek_command(char *line, unsigned *x, unsigned *y)
 
     int consumed = 0;
     int matched = sscanf(line, "AESDCHAR_IOCSEEKTO:%u,%u%n", x, y, &consumed);
-    syslog(LOG_INFO, "parse_seek_command() consumed = %d, matched=%d, x = %d, y = %d\n", consumed, matched, x, y); 
+    syslog(LOG_INFO, "parse_seek_command() consumed = %d, matched=%d, x = %d, y = %d\n", consumed, matched, *x, *y); 
 
     return (matched == 2) && (line[consumed] == '\0');
 }
