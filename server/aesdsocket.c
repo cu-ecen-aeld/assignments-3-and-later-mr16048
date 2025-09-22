@@ -21,7 +21,7 @@ void sig_handler(int);
 // static void print_cur_time(void);
 static void* proc_new_connection(void *);
 static int create_thread_and_run(int);
-static int write_to_out_file(int *, void *, size_t);
+static int write_to_out_file(int, void *, size_t);
 static void write_time_to_file(union sigval);
 static int write_prdc_to_file(void);
 static inline void trim_crlf(char *);
