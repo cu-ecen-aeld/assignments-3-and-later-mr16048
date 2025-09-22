@@ -150,6 +150,7 @@ static int write_all(int fd, void *buffer, size_t write_size){
     write_byte = write(fd, buffer + total_write_byte, write_size - total_write_byte);
     if(write_byte < 0){
       syslog(LOG_INFO, "write_all failed err=%d, write_size=%d\n", write_byte, write_size);
+      syslog(LOG_ERR, "write failed: %m"); 
       return 1;
     }
     total_write_byte += write_byte;
