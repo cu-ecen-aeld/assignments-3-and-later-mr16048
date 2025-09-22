@@ -149,7 +149,7 @@ static int write_all(int fd, void *buffer, size_t write_size){
   while(total_write_byte < write_size){
     write_byte = write(fd, buffer + total_write_byte, write_size - total_write_byte);
     if(write_byte < 0){
-      syslog(LOG_INFO, "write_all failed err=%d, write_size=%d\n", write_byte, write_size);
+      syslog(LOG_INFO, "write_all failed err=%d, write_size=%d, fd=%d\n", write_byte, write_size, fd);
       syslog(LOG_ERR, "write failed: %m"); 
       return 1;
     }
@@ -219,7 +219,7 @@ static void* proc_new_connection(void *arg){
   // write to file
   out_fd = open(OUT_FILE, O_RDONLY, 0644);
 
-  *err = write_to_out_file(&out_fd, buffer, read_byte);
+  *err = write_to_out_file(out_fd, buffer, read_byte);
   if(*err != 0){
     return err;
   }
@@ -285,15 +285,15 @@ TH_END:
   return err;
 }
 
-static int write_to_out_file(int *out_fd, void *buffer, size_t write_size){
+static int write_to_out_file(int out_fd, void *buffer, size_t write_size){
 
   // int out_fd;
   int err = 0;
   pthread_mutex_lock(&mutex);
-  if(out_fd == NULL){
-    *out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
+  if(out_fd == -1){
+    out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
   }
-  if(*out_fd == -1){
+  if(out_fd == -1){
     err = -1;
     return err;
   }
@@ -302,11 +302,11 @@ static int write_to_out_file(int *out_fd, void *buffer, size_t write_size){
   struct aesd_seekto seekto;
   if(parse_seek_command(buffer, &seekto.write_cmd, &seekto.write_cmd_offset) != 0){
     syslog(LOG_INFO, "write_to_out_file() ioctl\n");  
-    ioctl(*out_fd, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
+    ioctl(out_fd, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
   }
   else{
     syslog(LOG_INFO, "write_to_out_file() ordinal write\n");  
-    err = write_all(*out_fd, buffer, write_size);
+    err = write_all(out_fd, buffer, write_size);
   }
   // close(out_fd);
   pthread_mutex_unlock(&mutex);
@@ -340,7 +340,7 @@ static void write_time_to_file(union sigval sv){
     return;
   }
 
-  if(write_to_out_file(NULL, time_str, strlen(time_str)) != 0){
+  if(write_to_out_file(-1, time_str, strlen(time_str)) != 0){
     timer_error_flag = 1;
     perror("write timestamp to file");
     return;
