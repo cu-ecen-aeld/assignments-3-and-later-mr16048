@@ -145,6 +145,8 @@ static int write_all(int fd, void *buffer, size_t write_size){
   
   int write_byte, total_write_byte;
 
+  syslog(LOG_INFO, "write_all(): buffer = %s, write_size = %d", buffer, write_size); 
+
   total_write_byte = 0;
   while(total_write_byte < write_size){
     write_byte = write(fd, buffer + total_write_byte, write_size - total_write_byte);
@@ -155,6 +157,7 @@ static int write_all(int fd, void *buffer, size_t write_size){
     }
     total_write_byte += write_byte;
   }
+  syslog(LOG_INFO, "write_all(): written %d bytes, last char = %s", total_write_byte, ((char *)buffer)[total_write_byte - 1]); 
 
   return 0;
 }
