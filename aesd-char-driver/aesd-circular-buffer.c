@@ -139,11 +139,12 @@ void aesd_circular_buffer_add_entry(struct aesd_circular_buffer *buffer, const s
 	// 	kfree(current_str);
 	// }
 
-	PDEBUG("aesd_circular_buffer_add_entry adding buffer: %s", add_entry->buffptr);
+	PDEBUG("aesd_circular_buffer_add_entry adding buffer: %s, size=%d", add_entry->buffptr, add_entry->size);
 	PDEBUG("aesd_circular_buffer_add_entry result buffer: %s", tmp_entry.buffptr);
 
 	// buffer->entry[buffer->in_offs] = *add_entry;
 	char last_char = add_entry->buffptr[add_entry->size - 1];
+	PDEBUG("aesd_circular_buffer_add_entry last_char = %s", last_char);
 	if(last_char == '\n'){
 
 		wi = buffer->w_abs % AESDCHAR_MAX_WRITE_OPERATIONS_SUPPORTED;
@@ -206,12 +207,11 @@ size_t aesd_circular_buffer_raed(struct aesd_circular_buffer *buffer, char *resu
 		return -1;
 	}
 
-	PDEBUG("aesd_circular_buffer_raed(): before find");
 	startp = aesd_circular_buffer_find_entry_offset_and_index_for_fpos(buffer, *f_pos - buffer->start_char_abs, &start_byte_ofs);
 	if(startp < 0){
 		return 0;
 	}
-	PDEBUG("aesd_circular_buffer_raed(): after find");
+
 	buffer->out_offs = startp;
 	// if(!buffer->full && (buffer->out_offs == buffer->in_offs)){
 	if(startp == buffer->w_abs){
