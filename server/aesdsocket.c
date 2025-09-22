@@ -217,7 +217,7 @@ static void* proc_new_connection(void *arg){
   }
 
   // write to file
-  out_fd = open(OUT_FILE, O_RDONLY, 0644);
+  out_fd = open(OUT_FILE, O_RDWR | O_CREAT | O_APPEND, 0644);
 
   *err = write_to_out_file(out_fd, buffer, read_byte);
   if(*err != 0){
