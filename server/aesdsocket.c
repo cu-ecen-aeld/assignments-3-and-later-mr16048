@@ -349,6 +349,7 @@ static int write_to_out_file(int out_fd, void *buffer, size_t write_size){
   if(validate_buf == NULL){
     return -1;
   }
+  memcpy(validate_buf, buffer, write_size);
   if(parse_seek_command(validate_buf, &seekto.write_cmd, &seekto.write_cmd_offset) != 0){
     syslog(LOG_INFO, "write_to_out_file() ioctl\n");  
     ioctl(out_fd, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
@@ -436,7 +437,8 @@ static inline void trim_crlf(char *s)
 /* Returns 1 on success and sets *x,*y. Returns 0 if not a match. */
 static int parse_seek_command(char *line, unsigned *x, unsigned *y)
 {
-    if (!line || !x || !y) return 0;
+  syslog(LOG_INFO, "parse_seek_command() line = %s\n", line);   
+  if (!line || !x || !y) return 0;
 
     trim_crlf(line);
 
