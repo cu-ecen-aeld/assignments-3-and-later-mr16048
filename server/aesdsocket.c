@@ -434,7 +434,7 @@ static int parse_seek_command(char *line, unsigned *x, unsigned *y)
 {
     if (!line || !x || !y) return 0;
 
-    trim_crlf(line);
+    // trim_crlf(line);
 
     int consumed = 0;
     int matched = sscanf(line, "AESDCHAR_IOCSEEKTO:%u,%u%n", x, y, &consumed);
