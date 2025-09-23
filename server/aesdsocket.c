@@ -345,7 +345,11 @@ static int write_to_out_file(int out_fd, void *buffer, size_t write_size){
 
   syslog(LOG_INFO, "write_to_out_file() buffer=%s\n", buffer);
   struct aesd_seekto seekto;
-  if(parse_seek_command(buffer, &seekto.write_cmd, &seekto.write_cmd_offset) != 0){
+  char *validate_buf = (char *)malloc(write_size);
+  if(validate_buf == NULL){
+    return -1;
+  }
+  if(parse_seek_command(validate_buf, &seekto.write_cmd, &seekto.write_cmd_offset) != 0){
     syslog(LOG_INFO, "write_to_out_file() ioctl\n");  
     ioctl(out_fd, AESDCHAR_IOCSEEKTO, (unsigned long)&seekto);
   }
@@ -434,7 +438,7 @@ static int parse_seek_command(char *line, unsigned *x, unsigned *y)
 {
     if (!line || !x || !y) return 0;
 
-    // trim_crlf(line);
+    trim_crlf(line);
 
     int consumed = 0;
     int matched = sscanf(line, "AESDCHAR_IOCSEEKTO:%u,%u%n", x, y, &consumed);
