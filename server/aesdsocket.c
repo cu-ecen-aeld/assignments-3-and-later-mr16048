@@ -11,12 +11,14 @@
 #include <signal.h>
 #include <time.h>
 #include <pthread.h>
+#include <errno.h>
+#include <stdint.h>
 #include "../aesd-char-driver/aesd_ioctl.h"
 #define BUF_SIZE 1024
 #define OUT_FILE "/dev/aesdchar"
 #define SPECIAL_STR_PREFIX "AESDCHAR_IOCSEEKTO:"
 
-static int write_all(int, void *, size_t);
+static int write_all(int, const void *, size_t);
 void sig_handler(int);
 // static void print_cur_time(void);
 static void* proc_new_connection(void *);
@@ -141,6 +143,7 @@ CLOSE:
   }
 }
 
+#if 0
 static int write_all(int fd, void *buffer, size_t write_size){
   
   int write_byte, total_write_byte;
@@ -167,6 +170,39 @@ static int write_all(int fd, void *buffer, size_t write_size){
 
   return 0;
 }
+#else
+
+static int write_all(int fd, const void *buffer, size_t write_size)
+{
+    const uint8_t *p = (const uint8_t *)buffer;  // byte pointer
+    size_t total = 0;
+
+    // Safer logging: bound the %s by write_size (truncates on embedded NULs)
+    syslog(LOG_INFO, "write_all(): write_size=%zu, first bytes=\"%.*s\"",
+           write_size, (int)write_size, (const char*)buffer);
+
+    while (total < write_size) {
+        ssize_t n = write(fd, p + total, write_size - total);
+        if (n > 0) { total += (size_t)n; continue; }
+        if (n == -1 && errno == EINTR) continue;
+        // Optionally handle EAGAIN/EWOULDBLOCK with poll()/select()
+        syslog(LOG_ERR, "write_all(): write failed: %m (fd=%d, wrote=%zu/%zu)",
+               fd, total, write_size);
+        return -1;
+    }
+
+    syslog(LOG_INFO, "write_all(): written %zu bytes", total);
+
+    if (write_size > 0 && p[write_size - 1] == '\n') {
+        syslog(LOG_INFO, "write_all(): last byte is newline (0x0a)");
+    } else {
+        syslog(LOG_INFO, "write_all(): last byte is 0x%02x",
+               write_size ? p[write_size - 1] : 0xff);
+    }
+    return 0;
+}
+
+#endif
 
 // static void print_cur_time(void){
 //   struct timespec t1;
