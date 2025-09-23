@@ -148,7 +148,13 @@ ssize_t aesd_write(struct file *filp, const char __user *buf, size_t count,
 
      /* copy to the new entry */
 
-     PDEBUG("write(): user buf = %p, count = %zu", buf, count);
+     PDEBUG("write(): user buf = %s, count = %zu", buf, count);
+     if(buf[count -1 ]== '\n'){
+        PDEBUG("write(): the last of user buf is n");
+     }
+     else{
+        PDEBUG("write(): the last of user buf is not n");
+     }
 
     if (!access_ok(buf, count)) {
         PDEBUG("write(): user pointer not accessible");

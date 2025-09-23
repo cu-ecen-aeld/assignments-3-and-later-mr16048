@@ -158,7 +158,12 @@ static int write_all(int fd, void *buffer, size_t write_size){
     total_write_byte += write_byte;
   }
   syslog(LOG_INFO, "write_all(): written %d bytes", total_write_byte);
-  syslog(LOG_INFO, "write_all(): last 2 char = %s", buffer + total_write_byte -2); 
+  if((char)(buffer + total_write_byte -1) == '\n'){
+    syslog(LOG_INFO, "write_all(): last char is n"); 
+  }  
+  else{
+    syslog(LOG_INFO, "write_all(): last char is not n"); 
+  }
 
   return 0;
 }
